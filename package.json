@@ -1,0 +1,27 @@
+{
+  "name": "datenportal",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "build": "pnpm -r build",
+    "dev": "pnpm --filter @datenportal/web dev",
+    "dev:server": "pnpm --filter @datenportal/server dev"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  },
+  "pnpm": {
+    "//onlyBuiltDependencies": "Ohne diese Liste laesst pnpm die Bauskripte aus, und better-sqlite3 wird nie kompiliert.",
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "better-sqlite3"
+    ]
+  }
+}

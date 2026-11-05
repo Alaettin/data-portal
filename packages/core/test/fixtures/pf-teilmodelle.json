@@ -1,0 +1,2289 @@
+{
+ "dokumentation": [
+  {
+   "idShort": "Documents",
+   "displayName": [
+    {
+     "language": "de",
+     "text": "Dokumente (Übergabedokumentation)"
+    },
+    {
+     "language": "en",
+     "text": "Documents (handover documentation)"
+    }
+   ],
+   "semanticId": {
+    "type": "ExternalReference",
+    "keys": [
+     {
+      "type": "GlobalReference",
+      "value": "0173-1#02-ABI500#003"
+     }
+    ]
+   },
+   "typeValueListElement": "SubmodelElementCollection",
+   "value": [
+    {
+     "semanticId": {
+      "type": "ExternalReference",
+      "keys": [
+       {
+        "type": "GlobalReference",
+        "value": "0173-1#02-ABI500#003/0173-1#01-AHF579#003"
+       }
+      ]
+     },
+     "value": [
+      {
+       "idShort": "DocumentVersions",
+       "displayName": [
+        {
+         "language": "de",
+         "text": "Dokumentenversionen"
+        },
+        {
+         "language": "en",
+         "text": "Document versions"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABI503#003"
+         }
+        ]
+       },
+       "typeValueListElement": "SubmodelElementCollection",
+       "value": [
+        {
+         "displayName": [
+          {
+           "language": "de",
+           "text": "Document version"
+          },
+          {
+           "language": "en",
+           "text": "Document version"
+          }
+         ],
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "0173-1#02-ABI503#003/0173-1#01-AHF582#003"
+           }
+          ]
+         },
+         "value": [
+          {
+           "category": "PARAMETER",
+           "idShort": "Title",
+           "displayName": [
+            {
+             "language": "de",
+             "text": "Dokumententitel"
+            },
+            {
+             "language": "en",
+             "text": "Document title"
+            }
+           ],
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABG940#003"
+             }
+            ]
+           },
+           "value": [
+            {
+             "language": "fr",
+             "text": "Instruction Manual"
+            },
+            {
+             "language": "zh",
+             "text": "Instruction Manual"
+            },
+            {
+             "language": "de",
+             "text": "Instruction Manual"
+            },
+            {
+             "language": "en",
+             "text": "Instruction Manual"
+            }
+           ],
+           "modelType": "MultiLanguageProperty"
+          },
+          {
+           "idShort": "DigitalFiles",
+           "displayName": [
+            {
+             "language": "de",
+             "text": "Digitale Dateien"
+            },
+            {
+             "language": "en",
+             "text": "Digital files"
+            }
+           ],
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABK126#002"
+             }
+            ]
+           },
+           "typeValueListElement": "File",
+           "value": [
+            {
+             "displayName": [
+              {
+               "language": "de",
+               "text": "Name der spezifischen digitalen Datei@de"
+              },
+              {
+               "language": "en",
+               "text": "Name of the specific digital file@en"
+              }
+             ],
+             "semanticId": {
+              "type": "ExternalReference",
+              "keys": [
+               {
+                "type": "GlobalReference",
+                "value": "0173-1#02-ABK126#002"
+               }
+              ]
+             },
+             "value": "/aasx/suppl/tdoct4691__eng.pdf",
+             "contentType": "application/pdf",
+             "modelType": "File"
+            }
+           ],
+           "modelType": "SubmodelElementList"
+          }
+         ],
+         "modelType": "SubmodelElementCollection"
+        }
+       ],
+       "modelType": "SubmodelElementList"
+      }
+     ],
+     "modelType": "SubmodelElementCollection"
+    },
+    {
+     "semanticId": {
+      "type": "ExternalReference",
+      "keys": [
+       {
+        "type": "GlobalReference",
+        "value": "0173-1#02-ABI500#003/0173-1#01-AHF579#003"
+       }
+      ]
+     },
+     "value": [
+      {
+       "idShort": "DocumentVersions",
+       "displayName": [
+        {
+         "language": "de",
+         "text": "Dokumentenversionen"
+        },
+        {
+         "language": "en",
+         "text": "Document versions"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABI503#003"
+         }
+        ]
+       },
+       "typeValueListElement": "SubmodelElementCollection",
+       "value": [
+        {
+         "displayName": [
+          {
+           "language": "de",
+           "text": "Document version"
+          },
+          {
+           "language": "en",
+           "text": "Document version"
+          }
+         ],
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "0173-1#02-ABI503#003/0173-1#01-AHF582#003"
+           }
+          ]
+         },
+         "value": [
+          {
+           "category": "PARAMETER",
+           "idShort": "Title",
+           "displayName": [
+            {
+             "language": "de",
+             "text": "Dokumententitel"
+            },
+            {
+             "language": "en",
+             "text": "Document title"
+            }
+           ],
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABG940#003"
+             }
+            ]
+           },
+           "value": [
+            {
+             "language": "fr",
+             "text": "System Manual"
+            },
+            {
+             "language": "zh",
+             "text": "System Manual"
+            },
+            {
+             "language": "de",
+             "text": "System Manual"
+            },
+            {
+             "language": "en",
+             "text": "System Manual"
+            }
+           ],
+           "modelType": "MultiLanguageProperty"
+          },
+          {
+           "idShort": "DigitalFiles",
+           "displayName": [
+            {
+             "language": "de",
+             "text": "Digitale Dateien"
+            },
+            {
+             "language": "en",
+             "text": "Digital files"
+            }
+           ],
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABK126#002"
+             }
+            ]
+           },
+           "typeValueListElement": "File",
+           "value": [
+            {
+             "displayName": [
+              {
+               "language": "de",
+               "text": "Name der spezifischen digitalen Datei@de"
+              },
+              {
+               "language": "en",
+               "text": "Name of the specific digital file@en"
+              }
+             ],
+             "semanticId": {
+              "type": "ExternalReference",
+              "keys": [
+               {
+                "type": "GlobalReference",
+                "value": "0173-1#02-ABK126#002"
+               }
+              ]
+             },
+             "value": "/aasx/suppl/tdoct1704p_eng.pdf",
+             "contentType": "application/pdf",
+             "modelType": "File"
+            }
+           ],
+           "modelType": "SubmodelElementList"
+          }
+         ],
+         "modelType": "SubmodelElementCollection"
+        }
+       ],
+       "modelType": "SubmodelElementList"
+      }
+     ],
+     "modelType": "SubmodelElementCollection"
+    },
+    {
+     "semanticId": {
+      "type": "ExternalReference",
+      "keys": [
+       {
+        "type": "GlobalReference",
+        "value": "0173-1#02-ABI500#003/0173-1#01-AHF579#003"
+       }
+      ]
+     },
+     "value": [
+      {
+       "idShort": "DocumentVersions",
+       "displayName": [
+        {
+         "language": "de",
+         "text": "Dokumentenversionen"
+        },
+        {
+         "language": "en",
+         "text": "Document versions"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABI503#003"
+         }
+        ]
+       },
+       "typeValueListElement": "SubmodelElementCollection",
+       "value": [
+        {
+         "displayName": [
+          {
+           "language": "de",
+           "text": "Document version"
+          },
+          {
+           "language": "en",
+           "text": "Document version"
+          }
+         ],
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "0173-1#02-ABI503#003/0173-1#01-AHF582#003"
+           }
+          ]
+         },
+         "value": [
+          {
+           "category": "PARAMETER",
+           "idShort": "Title",
+           "displayName": [
+            {
+             "language": "de",
+             "text": "Dokumententitel"
+            },
+            {
+             "language": "en",
+             "text": "Document title"
+            }
+           ],
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABG940#003"
+             }
+            ]
+           },
+           "value": [
+            {
+             "language": "fr",
+             "text": "Functional Safety Manual"
+            },
+            {
+             "language": "zh",
+             "text": "Functional Safety Manual"
+            },
+            {
+             "language": "de",
+             "text": "Functional Safety Manual"
+            },
+            {
+             "language": "en",
+             "text": "Functional Safety Manual"
+            }
+           ],
+           "modelType": "MultiLanguageProperty"
+          },
+          {
+           "idShort": "DigitalFiles",
+           "displayName": [
+            {
+             "language": "de",
+             "text": "Digitale Dateien"
+            },
+            {
+             "language": "en",
+             "text": "Digital files"
+            }
+           ],
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABK126#002"
+             }
+            ]
+           },
+           "typeValueListElement": "File",
+           "value": [
+            {
+             "displayName": [
+              {
+               "language": "de",
+               "text": "Name der spezifischen digitalen Datei@de"
+              },
+              {
+               "language": "en",
+               "text": "Name of the specific digital file@en"
+              }
+             ],
+             "semanticId": {
+              "type": "ExternalReference",
+              "keys": [
+               {
+                "type": "GlobalReference",
+                "value": "0173-1#02-ABK126#002"
+               }
+              ]
+             },
+             "value": "/aasx/suppl/tdoct1589__eng.pdf",
+             "contentType": "application/pdf",
+             "modelType": "File"
+            }
+           ],
+           "modelType": "SubmodelElementList"
+          }
+         ],
+         "modelType": "SubmodelElementCollection"
+        }
+       ],
+       "modelType": "SubmodelElementList"
+      }
+     ],
+     "modelType": "SubmodelElementCollection"
+    },
+    {
+     "semanticId": {
+      "type": "ExternalReference",
+      "keys": [
+       {
+        "type": "GlobalReference",
+        "value": "0173-1#02-ABI500#003/0173-1#01-AHF579#003"
+       }
+      ]
+     },
+     "value": [
+      {
+       "idShort": "DocumentVersions",
+       "displayName": [
+        {
+         "language": "de",
+         "text": "Dokumentenversionen"
+        },
+        {
+         "language": "en",
+         "text": "Document versions"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABI503#003"
+         }
+        ]
+       },
+       "typeValueListElement": "SubmodelElementCollection",
+       "value": [
+        {
+         "displayName": [
+          {
+           "language": "de",
+           "text": "Document version"
+          },
+          {
+           "language": "en",
+           "text": "Document version"
+          }
+         ],
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "0173-1#02-ABI503#003/0173-1#01-AHF582#003"
+           }
+          ]
+         },
+         "value": [
+          {
+           "category": "PARAMETER",
+           "idShort": "Title",
+           "displayName": [
+            {
+             "language": "de",
+             "text": "Dokumententitel"
+            },
+            {
+             "language": "en",
+             "text": "Document title"
+            }
+           ],
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABG940#003"
+             }
+            ]
+           },
+           "value": [
+            {
+             "language": "fr",
+             "text": "Datasheet"
+            },
+            {
+             "language": "zh",
+             "text": "Datasheet"
+            },
+            {
+             "language": "de",
+             "text": "Datasheet"
+            },
+            {
+             "language": "en",
+             "text": "Datasheet"
+            }
+           ],
+           "modelType": "MultiLanguageProperty"
+          },
+          {
+           "idShort": "DigitalFiles",
+           "displayName": [
+            {
+             "language": "de",
+             "text": "Digitale Dateien"
+            },
+            {
+             "language": "en",
+             "text": "Digital files"
+            }
+           ],
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABK126#002"
+             }
+            ]
+           },
+           "typeValueListElement": "File",
+           "value": [
+            {
+             "displayName": [
+              {
+               "language": "de",
+               "text": "Name der spezifischen digitalen Datei@de"
+              },
+              {
+               "language": "en",
+               "text": "Name of the specific digital file@en"
+              }
+             ],
+             "semanticId": {
+              "type": "ExternalReference",
+              "keys": [
+               {
+                "type": "GlobalReference",
+                "value": "0173-1#02-ABK126#002"
+               }
+              ]
+             },
+             "value": "/aasx/suppl/181363_eng.pdf",
+             "contentType": "application/pdf",
+             "modelType": "File"
+            }
+           ],
+           "modelType": "SubmodelElementList"
+          }
+         ],
+         "modelType": "SubmodelElementCollection"
+        }
+       ],
+       "modelType": "SubmodelElementList"
+      }
+     ],
+     "modelType": "SubmodelElementCollection"
+    }
+   ],
+   "modelType": "SubmodelElementList"
+  }
+ ],
+ "aenderungen": [
+  {
+   "idShort": "Records",
+   "semanticId": {
+    "type": "ExternalReference",
+    "keys": [
+     {
+      "type": "GlobalReference",
+      "value": "0173-1#02-ABI294#003"
+     }
+    ]
+   },
+   "typeValueListElement": "SubmodelElementCollection",
+   "value": [
+    {
+     "semanticId": {
+      "type": "ExternalReference",
+      "keys": [
+       {
+        "type": "GlobalReference",
+        "value": "0173-1#02-ABI294#003/0173-1#01-AHE583#003"
+       }
+      ]
+     },
+     "value": [
+      {
+       "idShort": "Manufacturer",
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABI295#003/0173-1#01-AHE584#003"
+         }
+        ]
+       },
+       "value": [
+        {
+         "idShort": "ManufacturerName",
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "0173-1#02-AAO677#004"
+           }
+          ]
+         },
+         "value": [
+          {
+           "language": "de",
+           "text": "Pepperl+Fuchs SE"
+          },
+          {
+           "language": "en",
+           "text": "Pepperl+Fuchs SE"
+          }
+         ],
+         "modelType": "MultiLanguageProperty"
+        },
+        {
+         "idShort": "PhysicalAddress__0__",
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "https://admin-shell.io/zvei/nameplate/1/0/ContactInformations/ContactInformation"
+           }
+          ]
+         },
+         "value": [
+          {
+           "idShort": "Street",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-AAO128#002"
+             }
+            ]
+           },
+           "value": [
+            {
+             "language": "de",
+             "text": "Lilienthalstraße 200"
+            },
+            {
+             "language": "en",
+             "text": "Lilienthalstraße 200"
+            }
+           ],
+           "modelType": "MultiLanguageProperty"
+          },
+          {
+           "idShort": "Zipcode",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-AAO129#002"
+             }
+            ]
+           },
+           "value": [
+            {
+             "language": "de",
+             "text": "68219"
+            },
+            {
+             "language": "en",
+             "text": "68219"
+            }
+           ],
+           "modelType": "MultiLanguageProperty"
+          },
+          {
+           "idShort": "CityTown",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-AAO132#002"
+             }
+            ]
+           },
+           "value": [
+            {
+             "language": "de",
+             "text": "Mannheim"
+            },
+            {
+             "language": "en",
+             "text": "Mannheim"
+            }
+           ],
+           "modelType": "MultiLanguageProperty"
+          },
+          {
+           "idShort": "NationalCode",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-AAO134#002"
+             }
+            ]
+           },
+           "value": [
+            {
+             "language": "de",
+             "text": "DE"
+            },
+            {
+             "language": "en",
+             "text": "DE"
+            }
+           ],
+           "modelType": "MultiLanguageProperty"
+          }
+         ],
+         "modelType": "SubmodelElementCollection"
+        }
+       ],
+       "modelType": "SubmodelElementCollection"
+      },
+      {
+       "idShort": "ManufacturerChangeID",
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABG772#002"
+         }
+        ]
+       },
+       "valueType": "xs:string",
+       "value": "1",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "PcnType",
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/PcnType/1/0"
+         }
+        ]
+       },
+       "valueType": "xs:string",
+       "value": "PDN",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "LifeCycleData",
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/LifeCycleData/List/1/0"
+         }
+        ]
+       },
+       "typeValueListElement": "SubmodelElementCollection",
+       "value": [
+        {
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/LifeCycleData/Milestone/1/0"
+           }
+          ]
+         },
+         "value": [
+          {
+           "idShort": "MilestoneClassification",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABG773#002"
+             }
+            ]
+           },
+           "valueType": "xs:string",
+           "value": "EOS",
+           "modelType": "Property"
+          },
+          {
+           "idShort": "DateOfValidity",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABF815#002"
+             }
+            ]
+           },
+           "valueType": "xs:dateTime",
+           "value": "2026-12-31",
+           "modelType": "Property"
+          }
+         ],
+         "modelType": "SubmodelElementCollection"
+        },
+        {
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/LifeCycleData/Milestone/1/0"
+           }
+          ]
+         },
+         "value": [
+          {
+           "idShort": "MilestoneClassification",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABG773#002"
+             }
+            ]
+           },
+           "valueType": "xs:string",
+           "value": "LTD",
+           "modelType": "Property"
+          },
+          {
+           "idShort": "DateOfValidity",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABF815#002"
+             }
+            ]
+           },
+           "valueType": "xs:dateTime",
+           "value": "2026-12-31",
+           "modelType": "Property"
+          }
+         ],
+         "modelType": "SubmodelElementCollection"
+        },
+        {
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/LifeCycleData/Milestone/1/0"
+           }
+          ]
+         },
+         "value": [
+          {
+           "idShort": "MilestoneClassification",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABG773#002"
+             }
+            ]
+           },
+           "valueType": "xs:string",
+           "value": "EOP",
+           "modelType": "Property"
+          },
+          {
+           "idShort": "DateOfValidity",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABF815#002"
+             }
+            ]
+           },
+           "valueType": "xs:dateTime",
+           "value": "2026-12-31",
+           "modelType": "Property"
+          }
+         ],
+         "modelType": "SubmodelElementCollection"
+        }
+       ],
+       "modelType": "SubmodelElementList"
+      },
+      {
+       "idShort": "ReasonsOfChange",
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABI296#002"
+         }
+        ]
+       },
+       "typeValueListElement": "SubmodelElementCollection",
+       "value": [
+        {
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "0173-1#02-ABI296#002/0173-1#01-AHE585#002"
+           }
+          ]
+         },
+         "value": [
+          {
+           "idShort": "ReasonClassificationSystem",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABF813#002"
+             }
+            ]
+           },
+           "valueType": "xs:string",
+           "value": "VDMA24903",
+           "modelType": "Property"
+          },
+          {
+           "idShort": "ReasonId",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABG774#002"
+             }
+            ]
+           },
+           "valueType": "xs:string",
+           "value": "PDN",
+           "modelType": "Property"
+          }
+         ],
+         "modelType": "SubmodelElementCollection"
+        }
+       ],
+       "modelType": "SubmodelElementList"
+      },
+      {
+       "idShort": "ItemCategories",
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/ItemCategory/List/1/0"
+         }
+        ]
+       },
+       "typeValueListElement": "SubmodelElementCollection",
+       "value": [
+        {
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/ItemCategory/1/0"
+           }
+          ]
+         },
+         "value": [
+          {
+           "idShort": "ItemClassificationSystem",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/ItemCategory/ItemClassificationSystem/1/0"
+             }
+            ]
+           },
+           "valueType": "xs:string",
+           "value": "VDMA24903",
+           "modelType": "Property"
+          },
+          {
+           "idShort": "ItemCategory",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/ItemCategory/ItemCategory/1/0"
+             }
+            ]
+           },
+           "valueType": "xs:string",
+           "value": "ACEL",
+           "modelType": "Property"
+          }
+         ],
+         "modelType": "SubmodelElementCollection"
+        }
+       ],
+       "modelType": "SubmodelElementList"
+      },
+      {
+       "idShort": "PcnChangeInformation",
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/PcnChangeInformation/1/0"
+         }
+        ]
+       },
+       "value": [
+        {
+         "idShort": "ChangeTitle",
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/PcnChangeInformation/ChangeTitle/1/0"
+           }
+          ]
+         },
+         "value": [
+          {
+           "language": "de",
+           "text": "Produktabkündigung, neues Leiterplattendesign"
+          },
+          {
+           "language": "en",
+           "text": "Product discontinuation, new PCB design"
+          }
+         ],
+         "modelType": "MultiLanguageProperty"
+        },
+        {
+         "idShort": "ChangeDetail",
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/PcnChangeInformation/ChangeDetail/1/0"
+           }
+          ]
+         },
+         "value": [
+          {
+           "language": "de",
+           "text": "KFD2-SR2-2.2S (Bestellnummer 181363) wird aufgrund eines neuen Leiterplattendesigns abgekündigt. Nachfolger ist KFD2-SR3-2.2S (Bestellnummer 262113) mit identischen Abmessungen (20 mm x 107 mm x 115 mm). Produktionsende, Verkaufsende und letzte Lieferung ist der 31.12.2026. Bitte für neue Bestellungen und Planungen auf den Nachfolger umstellen."
+          },
+          {
+           "language": "en",
+           "text": "KFD2-SR2-2.2S (order code 181363) is discontinued due to a new PCB design. The successor is KFD2-SR3-2.2S (order code 262113) with identical dimensions (20 mm x 107 mm x 115 mm). End of production, end of sale and last time delivery are 31.12.2026. Please switch to the successor for new orders and designs."
+          }
+         ],
+         "modelType": "MultiLanguageProperty"
+        }
+       ],
+       "modelType": "SubmodelElementCollection"
+      },
+      {
+       "idShort": "DateOfRecord",
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABF816#003"
+         }
+        ]
+       },
+       "valueType": "xs:dateTime",
+       "value": "2026-10-30",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "ItemOfChange",
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABI297#003/0173-1#01-AHE586#003"
+         }
+        ]
+       },
+       "value": [
+        {
+         "idShort": "ManufacturerProductFamily",
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "0173-1#02-AAU731#003"
+           }
+          ]
+         },
+         "value": [
+          {
+           "language": "de",
+           "text": "KFD2-SR2"
+          },
+          {
+           "language": "en",
+           "text": "KFD2-SR2"
+          }
+         ],
+         "modelType": "MultiLanguageProperty"
+        },
+        {
+         "idShort": "ManufacturerProductDesignation",
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "0173-1#02-AAW338#002"
+           }
+          ]
+         },
+         "value": [
+          {
+           "language": "de",
+           "text": "KFD2-SR2-2.2S"
+          },
+          {
+           "language": "en",
+           "text": "KFD2-SR2-2.2S"
+          }
+         ],
+         "modelType": "MultiLanguageProperty"
+        },
+        {
+         "idShort": "OrderCodeOfManufacturer",
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "0173-1#02-AAO227#004"
+           }
+          ]
+         },
+         "value": [
+          {
+           "language": "de",
+           "text": "181363"
+          },
+          {
+           "language": "en",
+           "text": "181363"
+          }
+         ],
+         "modelType": "MultiLanguageProperty"
+        }
+       ],
+       "modelType": "SubmodelElementCollection"
+      },
+      {
+       "idShort": "RecommendedItems",
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/RecommendedItem/List/1/0"
+         }
+        ]
+       },
+       "typeValueListElement": "SubmodelElementCollection",
+       "value": [
+        {
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "http://admin-shell.io/VDMA/Fluidics/ProductChangeNotification/RecommendedItem/1/0"
+           }
+          ]
+         },
+         "value": [
+          {
+           "idShort": "ManufacturerProductFamily",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-AAU731#003"
+             }
+            ]
+           },
+           "value": [
+            {
+             "language": "de",
+             "text": "KFD2-SR3"
+            },
+            {
+             "language": "en",
+             "text": "KFD2-SR3"
+            }
+           ],
+           "modelType": "MultiLanguageProperty"
+          },
+          {
+           "idShort": "ManufacturerProductDesignation",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-AAW338#002"
+             }
+            ]
+           },
+           "value": [
+            {
+             "language": "de",
+             "text": "KFD2-SR3-2.2S"
+            },
+            {
+             "language": "en",
+             "text": "KFD2-SR3-2.2S"
+            }
+           ],
+           "modelType": "MultiLanguageProperty"
+          },
+          {
+           "idShort": "OrderCodeOfManufacturer",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-AAO227#004"
+             }
+            ]
+           },
+           "value": [
+            {
+             "language": "de",
+             "text": "262113"
+            },
+            {
+             "language": "en",
+             "text": "262113"
+            }
+           ],
+           "modelType": "MultiLanguageProperty"
+          },
+          {
+           "idShort": "TechnicalData_Fit",
+           "semanticId": {
+            "type": "ExternalReference",
+            "keys": [
+             {
+              "type": "GlobalReference",
+              "value": "0173-1#02-ABI299#003/0173-1#01-AHE588#003"
+             }
+            ]
+           },
+           "value": [
+            {
+             "idShort": "TargetEstimate",
+             "semanticId": {
+              "type": "ExternalReference",
+              "keys": [
+               {
+                "type": "GlobalReference",
+                "value": "0173-1#02-ABG777#003"
+               }
+              ]
+             },
+             "valueType": "xs:float",
+             "value": "1.00",
+             "modelType": "Property"
+            }
+           ],
+           "modelType": "SubmodelElementCollection"
+          }
+         ],
+         "modelType": "SubmodelElementCollection"
+        }
+       ],
+       "modelType": "SubmodelElementList"
+      }
+     ],
+     "modelType": "SubmodelElementCollection"
+    }
+   ],
+   "modelType": "SubmodelElementList"
+  }
+ ],
+ "technisch": [
+  {
+   "idShort": "GeneralInformation",
+   "displayName": [
+    {
+     "language": "de",
+     "text": "Allgemeine Informationen"
+    },
+    {
+     "language": "en",
+     "text": "General information"
+    }
+   ],
+   "semanticId": {
+    "type": "ExternalReference",
+    "keys": [
+     {
+      "type": "GlobalReference",
+      "value": "0173-1#02-ABK161#002/0173-1#01-AHX838#002"
+     }
+    ]
+   },
+   "value": [
+    {
+     "category": "PARAMETER",
+     "idShort": "ManufacturerProductDesignation",
+     "displayName": [
+      {
+       "language": "de",
+       "text": "Herstellerproduktbezeichnung"
+      },
+      {
+       "language": "en",
+       "text": "Manufacturer product designation"
+      }
+     ],
+     "semanticId": {
+      "type": "ExternalReference",
+      "keys": [
+       {
+        "type": "GlobalReference",
+        "value": "0173-1#02-AAW338#003"
+       }
+      ]
+     },
+     "value": [
+      {
+       "language": "de",
+       "text": "KFD2-SR2-2.2S"
+      },
+      {
+       "language": "fr",
+       "text": "KFD2-SR2-2.2S"
+      },
+      {
+       "language": "zh",
+       "text": "KFD2-SR2-2.2S"
+      },
+      {
+       "language": "en",
+       "text": "KFD2-SR2-2.2S"
+      }
+     ],
+     "modelType": "MultiLanguageProperty"
+    },
+    {
+     "category": "PARAMETER",
+     "idShort": "ManufacturerArticleNumber",
+     "displayName": [
+      {
+       "language": "de",
+       "text": "Herstellerartikelnummer"
+      },
+      {
+       "language": "en",
+       "text": "Manufacturer article number"
+      }
+     ],
+     "semanticId": {
+      "type": "ExternalReference",
+      "keys": [
+       {
+        "type": "GlobalReference",
+        "value": "0173-1#02-AAO676#005"
+       }
+      ]
+     },
+     "valueType": "xs:string",
+     "value": "181363",
+     "modelType": "Property"
+    },
+    {
+     "idShort": "ProductImages0",
+     "displayName": [
+      {
+       "language": "de",
+       "text": "Produktbilder"
+      },
+      {
+       "language": "en",
+       "text": "Product images"
+      }
+     ],
+     "semanticId": {
+      "type": "ExternalReference",
+      "keys": [
+       {
+        "type": "GlobalReference",
+        "value": "0173-1#02-ABM220#001"
+       }
+      ]
+     },
+     "typeValueListElement": "SubmodelElementCollection",
+     "value": [
+      {
+       "displayName": [
+        {
+         "language": "de",
+         "text": "Produktbild"
+        },
+        {
+         "language": "en",
+         "text": "Product image"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABM220#001/0173-1#01-AHY911#001"
+         }
+        ]
+       },
+       "value": [
+        {
+         "idShort": "ImageFile",
+         "displayName": [
+          {
+           "language": "de",
+           "text": "Bildname Sachaufnahme"
+          },
+          {
+           "language": "en",
+           "text": "Product image"
+          }
+         ],
+         "semanticId": {
+          "type": "ExternalReference",
+          "keys": [
+           {
+            "type": "GlobalReference",
+            "value": "0173-1#02-ABK291#002"
+           }
+          ]
+         },
+         "value": "/aasx/suppl/b231996b.png",
+         "contentType": "image/png",
+         "modelType": "File"
+        }
+       ],
+       "modelType": "SubmodelElementCollection"
+      }
+     ],
+     "modelType": "SubmodelElementList"
+    }
+   ],
+   "modelType": "SubmodelElementCollection"
+  },
+  {
+   "idShort": "TechnicalPropertyAreas0",
+   "displayName": [
+    {
+     "language": "de",
+     "text": "Technsiche Merkmalsbereiche"
+    },
+    {
+     "language": "en",
+     "text": "Technical property areas"
+    }
+   ],
+   "semanticId": {
+    "type": "ExternalReference",
+    "keys": [
+     {
+      "type": "GlobalReference",
+      "value": "0173-1#02-ABK163#002"
+     }
+    ]
+   },
+   "typeValueListElement": "SubmodelElementCollection",
+   "value": [
+    {
+     "displayName": [
+      {
+       "language": "de",
+       "text": "Technischer Merkmalsbereich"
+      },
+      {
+       "language": "en",
+       "text": "Technical property area"
+      }
+     ],
+     "semanticId": {
+      "type": "ExternalReference",
+      "keys": [
+       {
+        "type": "GlobalReference",
+        "value": "0173-1#02-ABL358#002/0173-1#01-AHX773#002"
+       }
+      ]
+     },
+     "value": [
+      {
+       "idShort": "Number_of_inputs_according_to_NAMUR_AAP507_v003",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Number of inputs according to NAMUR"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAP507#003"
+         }
+        ]
+       },
+       "valueType": "xs:float",
+       "value": "1",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "Design_of_electrical_connection_BAD831_v015",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Design of electrical connection"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-BAD831#015"
+         }
+        ]
+       },
+       "valueType": "xs:string",
+       "value": "Schraubanschluss",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "height_BAA020_v011",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "height"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-BAA020#011"
+         }
+        ]
+       },
+       "valueType": "xs:float",
+       "value": "119",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "Output_circuit_relay_change_over_AAB426_v009",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Output circuit relay change-over"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAB426#009"
+         }
+        ]
+       },
+       "valueType": "xs:float",
+       "value": "4",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "Max_operating_temperature_AAC821_v007",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Max. operating temperature"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAC821#007"
+         }
+        ]
+       },
+       "valueType": "xs:float",
+       "value": "60",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "depth_BAB577_v009",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "depth"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-BAB577#009"
+         }
+        ]
+       },
+       "valueType": "xs:float",
+       "value": "115",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "width_BAF016_v007",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "width"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-BAF016#007"
+         }
+        ]
+       },
+       "valueType": "xs:float",
+       "value": "20",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "Manufacturer_product_designation_AAW338_v002",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Manufacturer product designation"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAW338#002"
+         }
+        ]
+       },
+       "value": [
+        {
+         "language": "de",
+         "text": "KFD2-SR2-2.2S"
+        },
+        {
+         "language": "fr",
+         "text": "KFD2-SR2-2.2S"
+        },
+        {
+         "language": "zh",
+         "text": "KFD2-SR2-2.2S"
+        },
+        {
+         "language": "en",
+         "text": "KFD2-SR2-2.2S"
+        }
+       ],
+       "modelType": "MultiLanguageProperty"
+      },
+      {
+       "idShort": "Product_type_AAO057_v003",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Product type"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAO057#003"
+         }
+        ]
+       },
+       "value": [
+        {
+         "language": "de",
+         "text": "Schaltverstärker"
+        },
+        {
+         "language": "fr",
+         "text": "Ampli-séparateur"
+        },
+        {
+         "language": "zh",
+         "text": "Switch Amplifier"
+        },
+        {
+         "language": "en",
+         "text": "Switch Amplifier"
+        }
+       ],
+       "modelType": "MultiLanguageProperty"
+      },
+      {
+       "idShort": "Manufacturer_product_root_AAU732_v002",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Manufacturer product root"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAU732#002"
+         }
+        ]
+       },
+       "value": [
+        {
+         "language": "de",
+         "text": "Industrielle Kommunikation und Interfaces"
+        },
+        {
+         "language": "fr",
+         "text": "Communication et interfaces industrielles"
+        },
+        {
+         "language": "zh",
+         "text": "工业通信与接口"
+        },
+        {
+         "language": "en",
+         "text": "Industrial Communication and Interfaces"
+        }
+       ],
+       "modelType": "MultiLanguageProperty"
+      },
+      {
+       "idShort": "product_article_number_of_manufacturer_AAO676_v004",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "product article number of manufacturer"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAO676#004"
+         }
+        ]
+       },
+       "valueType": "xs:string",
+       "value": "181363",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "Min_operating_temperature_AAC820_v007",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Min. operating temperature"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAC820#007"
+         }
+        ]
+       },
+       "valueType": "xs:float",
+       "value": "-20",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "Manufacturer_product_description_AAU734_v002",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Manufacturer product description"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAU734#002"
+         }
+        ]
+       },
+       "value": [
+        {
+         "language": "de",
+         "text": "2-kanaliger Signaltrenner, 24 V DC-Versorgung (Power Rail), Kontakt- oder NAMUR-Eingänge, Verwendbar als Signal-Splitter (1&nbsp;Eingang und 2 Ausgänge), 2 x 2 Relaiskontaktausgänge mit UND-Logik, Leitungsfehlerüberwachung, Umkehrbare Wirkungsrichtung, Bis SIL 2 gemäß IEC/EN 61508 / IEC/EN 61511, Gehäusebreite: 20 mm, Kanalzahl: 2-kanalig, Sicherheits-Integritätslevel (SIL): SIL 2, Bemessungsspannung: 20 ... 30 V DC, Feldgerät: NAMUR-Sensor, Feldgerät [2]: potenzialfreier Kontakt"
+        },
+        {
+         "language": "fr",
+         "text": "Séparateur de signal 2 canaux, Alimentation 24 V CC (Power Rail), Entrées pour contact ou NAMUR, Utilisable comme répartiteur de signal (1&nbsp;entrée et 2&nbsp;sorties), 2 Sorties à 2 relais avec logique ET, Surveillance de défaut de ligne, Sens d'action interchangeable, Jusqu'à SIL 2 selon IEC/EN 61508 / IEC/EN 61511, Largeur du boîtier: 20 mm, Nombre de voies: version à 2 voies, Niveau d'intégrité de sécurité (SIL): SIL 2, Tension assignée: 20 ... 30 V CC, l'appareil de terrain: détecteur NAMUR"
+        },
+        {
+         "language": "zh",
+         "text": "2-channel signal conditioner, 24 V DC supply (Power Rail), Dry contact or NAMUR inputs, Usable as signal splitter (1 input and 2 outputs), 2 x 2 relay contact outputs with AND logic, Line fault detection (LFD), Reversible mode of operation, Up to SIL 2 acc. to IEC/EN 61508 / IEC/EN 61511, Housing width: 20 mm, Number of channels: 2-channel, Safety Integrity Level (SIL): SIL 2, Rated voltage: 20 ... 30 V DC, Field device: NAMUR sensor, Field device [2]: volt-free contact, Line fault detection"
+        },
+        {
+         "language": "en",
+         "text": "2-channel signal conditioner, 24 V DC supply (Power Rail), Dry contact or NAMUR inputs, Usable as signal splitter (1 input and 2 outputs), 2 x 2 relay contact outputs with AND logic, Line fault detection (LFD), Reversible mode of operation, Up to SIL 2 acc. to IEC/EN 61508 / IEC/EN 61511, Housing width: 20 mm, Number of channels: 2-channel, Safety Integrity Level (SIL): SIL 2, Rated voltage: 20 ... 30 V DC, Field device: NAMUR sensor, Field device [2]: volt-free contact, Line fault detection"
+        }
+       ],
+       "modelType": "MultiLanguageProperty"
+      },
+      {
+       "idShort": "Manufacturer_product_family_AAU731_v002",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Manufacturer product family"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAU731#002"
+         }
+        ]
+       },
+       "value": [
+        {
+         "language": "de",
+         "text": "Signaltrenner"
+        },
+        {
+         "language": "fr",
+         "text": "Conditionneurs de signaux"
+        },
+        {
+         "language": "zh",
+         "text": "信号调节器"
+        },
+        {
+         "language": "en",
+         "text": "Signal Conditioners"
+        }
+       ],
+       "modelType": "MultiLanguageProperty"
+      },
+      {
+       "idShort": "min_rated_supply_voltage_with_DC_AAB968_v009",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "min. rated supply voltage with DC"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAB968#009"
+         }
+        ]
+       },
+       "valueType": "xs:float",
+       "value": "20",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "URI_of_the_product_ABH173_v002",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "URI of the product"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABH173#002"
+         }
+        ]
+       },
+       "valueType": "xs:anyURI",
+       "value": "https://pefu.de/40000180025476",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "number_of_channels_AAP380_v004",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "number of channels"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAP380#004"
+         }
+        ]
+       },
+       "valueType": "xs:integer",
+       "value": "2",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "URI_of_manufacturer_ABA669_v002",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "URI of manufacturer"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-ABA669#002"
+         }
+        ]
+       },
+       "valueType": "xs:anyURI",
+       "value": "https://pefu.de/40000180025476",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "Type_of_voltage_supply_AAB371_v010",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Type of voltage supply"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAB371#010"
+         }
+        ]
+       },
+       "valueType": "xs:string",
+       "value": "aktiv",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "degree_of_protection_BAG975_v015",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "degree of protection"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-BAG975#015"
+         }
+        ]
+       },
+       "valueType": "xs:string",
+       "value": "IP20",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "max_rated_supply_voltage_with_DC_AAB834_v009",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "max. rated supply voltage with DC"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAB834#009"
+         }
+        ]
+       },
+       "valueType": "xs:float",
+       "value": "30",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "Construction_of_unit_AAB712_v008",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Construction of unit"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAB712#008"
+         }
+        ]
+       },
+       "valueType": "xs:string",
+       "value": "Einbaugerät",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "safety_integrity_level_SIL__AAO382_v010",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "safety integrity level (SIL)"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-AAO382#010"
+         }
+        ]
+       },
+       "valueType": "xs:string",
+       "value": "SIL 2",
+       "modelType": "Property"
+      },
+      {
+       "idShort": "Assembly_type_BAG640_v012",
+       "displayName": [
+        {
+         "language": "en",
+         "text": "Assembly type"
+        }
+       ],
+       "semanticId": {
+        "type": "ExternalReference",
+        "keys": [
+         {
+          "type": "GlobalReference",
+          "value": "0173-1#02-BAG640#012"
+         }
+        ]
+       },
+       "valueType": "xs:string",
+       "value": "DIN-Schiene",
+       "modelType": "Property"
+      }
+     ],
+     "modelType": "SubmodelElementCollection"
+    }
+   ],
+   "modelType": "SubmodelElementList"
+  },
+  {
+   "idShort": "FurtherInformation",
+   "displayName": [
+    {
+     "language": "de",
+     "text": "Weitere Informationen"
+    },
+    {
+     "language": "en",
+     "text": "Further information"
+    }
+   ],
+   "semanticId": {
+    "type": "ExternalReference",
+    "keys": [
+     {
+      "type": "GlobalReference",
+      "value": "0173-1#02-ABK164#002"
+     }
+    ]
+   },
+   "value": [
+    {
+     "category": "PARAMETER",
+     "idShort": "TextStatement0",
+     "displayName": [
+      {
+       "language": "de",
+       "text": "Anweisung im Text"
+      },
+      {
+       "language": "en",
+       "text": "Text statement"
+      }
+     ],
+     "semanticId": {
+      "type": "ExternalReference",
+      "keys": [
+       {
+        "type": "GlobalReference",
+        "value": "0173-1#02-ABK134#002"
+       }
+      ]
+     },
+     "value": [
+      {
+       "language": "de",
+       "text": "https://files.pepperl-fuchs.com/webcat/navi/productInfo/pds/181363_eng.pdf"
+      },
+      {
+       "language": "fr",
+       "text": "https://files.pepperl-fuchs.com/webcat/navi/productInfo/pds/181363_eng.pdf"
+      },
+      {
+       "language": "zh",
+       "text": "https://files.pepperl-fuchs.com/webcat/navi/productInfo/pds/181363_eng.pdf"
+      },
+      {
+       "language": "en",
+       "text": "https://files.pepperl-fuchs.com/webcat/navi/productInfo/pds/181363_eng.pdf"
+      }
+     ],
+     "modelType": "MultiLanguageProperty"
+    }
+   ],
+   "modelType": "SubmodelElementCollection"
+  }
+ ]
+}

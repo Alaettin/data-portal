@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@import "@fontsource/raleway/400.css";
+@import "@fontsource/raleway/500.css";
+@import "@fontsource/raleway/600.css";
+@import "@fontsource/raleway/700.css";
+@import "@fontsource/raleway/800.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+
+/*
+ * Design-Werte der HMI-App (messeapp/client/src/styles/tokens.css), die sie selbst aus der
+ * NAMUR-App hat. Aenderungen dort hierher nachziehen. Ergaenzt um die vier Ereignisarten.
+ */
+@theme {
+  --color-grund: #efefef;
+  --color-flaeche: #ffffff;
+
+  --color-text: #1b1d26;
+  --color-text-zweit: #43454f;
+  --color-text-hinweis: #5e606c;
+
+  --color-linie: #e3e4e7;
+  --color-linie-feld: #cbccd2;
+
+  /* Neoception-Gruen. */
+  --color-primaer: #00a587;
+  --color-primaer-dunkel: #00846d;
+  --color-primaer-grund: #e0f4f0;
+
+  --color-fehler: #c24e1e;
+  --color-fehler-grund: #fde4d8;
+  --color-erfolg: #006353;
+
+  /* Ereignisarten: registriert gruen, aktualisiert Core Blue, PCN Orange, Abkuendigung Rot. */
+  --color-art-registriert: #00846d;
+  --color-art-aktualisiert: #1c5db3;
+  --color-art-pcn: #b8620b;
+  --color-art-abkuendigung: #c24e1e;
+
+  /* Fokus sichtbar, Core Blue. */
+  --color-fokus: #1c5db3;
+
+  --font-sans: "Raleway", "Helvetica Neue", system-ui, sans-serif;
+  /* GUIDs, Kennungen, Pfade, Uhrzeiten. */
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --shadow-flaeche: 0 2px 6px rgb(27 29 38 / 0.07);
+}
+
+/*
+ * Flaechen, Tabellen und Eingabefelder haben 0 px Radius; rund sind nur Knoepfe,
+ * Segment-Umschalter und die Seitenumschaltung, und die tragen `rounded-full`.
+ */
+@layer base {
+  body {
+    background: var(--color-grund);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    /* Raleway setzt ab Werk Mediaevalziffern; in Tabellen und Kennzahlen tanzen die. */
+    font-variant-numeric: lining-nums;
+    margin: 0;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Fokus bleibt sichtbar. Kein `outline: none` irgendwo. */
+  :focus-visible {
+    outline: 2px solid var(--color-fokus);
+    outline-offset: 2px;
+  }
+}
+
+/* Neu eingetroffen: ein kurzer gruener Schimmer, der ausklingt. */
+@keyframes neu-eingetroffen {
+  from {
+    background-color: var(--color-primaer-grund);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+.neu-eingetroffen {
+  animation: neu-eingetroffen 4s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .neu-eingetroffen {
+    animation: none;
+  }
+}
