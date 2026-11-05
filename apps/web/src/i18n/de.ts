@@ -185,7 +185,7 @@ export const de = {
   "anm.falsch": "E-Mail oder Passwort stimmt nicht.",
   "anm.zuViele": "Zu viele Versuche. Bitte in einigen Minuten erneut.",
   "anm.verbindung": "Verbindungsfehler. Bitte erneut versuchen.",
-  "anm.zurueck": "← Zum Portal",
+  "anm.zurueck": "Zum öffentlichen Portal",
 
   "bo.augenbraue": "Backoffice",
   "bo.organisationsseite": "Organisationsseite",

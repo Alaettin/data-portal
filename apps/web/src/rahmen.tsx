@@ -163,10 +163,18 @@ const BESUCHER: Reiter[] = [
 /** Der offene Bereich. Rechts: Sprache, und je nach Sitzung "Anmelden" oder "Backoffice". */
 export function BesucherRahmen() {
   const { t } = useT();
-  const { nutzer, organisation } = useKonto();
+  const { nutzer, organisation, abmelden } = useKonto();
+  const { auffrischen } = useStrom();
   const navigate = useNavigate();
   const ziel = nutzer?.rolle === "admin" ? "/verwaltung/organisationen" : organisation ? `/backoffice/${organisation.id}` : "/anmelden";
   const text = nutzer ? t("nav.backoffice") : t("nav.anmelden");
+
+  /** Auf der Seite bleiben und sie ohne Anmeldung neu laden (private Inhalte verschwinden dann). */
+  async function ausloggen() {
+    await abmelden();
+    auffrischen();
+  }
+
   return (
     <Rahmen
       reiter={BESUCHER}
@@ -179,9 +187,14 @@ export function BesucherRahmen() {
             {text}
             {nutzer && <span aria-hidden="true">→</span>}
           </Link>
+          {nutzer && (
+            <button type="button" onClick={() => void ausloggen()} className={knopfKlassen("rand", "h-[34px] px-3.5 text-[13px]")}>
+              {t("nav.abmelden")}
+            </button>
+          )}
         </>
       }
-      menueExtras={[{ text, aktion: () => navigate(ziel) }]}
+      menueExtras={[{ text, aktion: () => navigate(ziel) }, ...(nutzer ? [{ text: t("nav.abmelden"), aktion: () => void ausloggen() }] : [])]}
     />
   );
 }

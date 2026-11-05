@@ -187,7 +187,7 @@ export const en = {
   "anm.falsch": "Email or password is incorrect.",
   "anm.zuViele": "Too many attempts. Please try again in a few minutes.",
   "anm.verbindung": "Connection error. Please try again.",
-  "anm.zurueck": "← Public portal",
+  "anm.zurueck": "Go to the public portal",
 
   "bo.augenbraue": "Back office",
   "bo.organisationsseite": "Organisation page",

@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Link, useParams } from "react-router";
 import type { Kennzahlen, Organisation } from "../../api.ts";
-import { Augenbraue, Flaeche, Kennzahlenreihe, Seitenkopf, Zustand } from "../../bausteine/basis.tsx";
+import { Flaeche, Kennzahlenreihe, Seitenkopf, Zustand } from "../../bausteine/basis.tsx";
 import { lesbareFarbe, OrgMarke } from "../../bausteine/fach.tsx";
 import { useT } from "../../i18n/sprache.tsx";
 import { useDaten } from "../../strom.tsx";
@@ -70,7 +70,6 @@ export function OrgAnsicht({ slug, basisPfad, privatHinweis }: { slug: string; b
           <Flaeche className="flex flex-col gap-5 border-t-[10px] p-6 sm:flex-row sm:items-start sm:p-8" style={{ borderTopColor: o.farbe }}>
             <OrgMarke id={o.id} name={o.name} farbe={o.farbe} hatLogo={o.hatLogo} groesse={88} />
             <div className="flex min-w-0 flex-1 flex-col gap-3">
-              <Augenbraue>{t("nav.organisationen")}</Augenbraue>
               <h1 className="text-[32px] leading-tight font-bold tracking-[-0.02em] sm:text-4xl">{o.name}</h1>
               {o.beschreibung && <p className="max-w-[52rem] text-[15px] leading-relaxed whitespace-pre-line text-text-zweit">{o.beschreibung}</p>}
               {(o.webseite || o.kontaktEmail) && (

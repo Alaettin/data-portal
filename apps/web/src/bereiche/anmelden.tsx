@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router";
 import { ApiFehler } from "../api.ts";
-import { Feld, Fehlerhinweis, Knopf } from "../bausteine/basis.tsx";
+import { Feld, Fehlerhinweis, Knopf, knopfKlassen } from "../bausteine/basis.tsx";
 import { AxonLogo } from "../bausteine/logos.tsx";
 import keyvisual from "../assets/keyvisual.webp";
 import { useT } from "../i18n/sprache.tsx";
@@ -63,9 +63,13 @@ export function Anmelden() {
             {laedt ? t("anm.pruefen") : t("anm.titel")}
           </Knopf>
         </form>
-        <Link to="/" className="self-start text-sm font-semibold text-text-hinweis hover:text-text">
-          {t("anm.zurueck")}
-        </Link>
+        {/* Als eigener Knopf statt kleinem Textlink (Nutzervorgabe 05.11.2026). */}
+        <div className="flex flex-col gap-4 border-t border-linie pt-6">
+          <Link to="/" className={knopfKlassen("rand", "h-12 w-full text-base")}>
+            <span aria-hidden="true">←</span>
+            {t("anm.zurueck")}
+          </Link>
+        </div>
       </main>
     </div>
   );
