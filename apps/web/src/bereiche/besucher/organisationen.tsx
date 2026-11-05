@@ -22,8 +22,9 @@ export function Organisationen() {
                   className="flex h-full flex-col gap-4 border-t-8 p-5 transition-shadow group-hover:shadow-[0_6px_18px_rgb(27_29_38/0.12)]"
                   style={{ borderTopColor: o.farbe }}
                 >
-                  <span className="flex items-center gap-3">
-                    <OrgMarke id={o.id} name={o.name} farbe={o.farbe} hatLogo={o.hatLogo} groesse={48} />
+                  {/* Logo ueber dem Namen: Wortmarken sind breit und liessen neben sich keinen Platz. */}
+                  <span className="flex min-w-0 flex-col items-start gap-3">
+                    <OrgMarke id={o.id} name={o.name} farbe={o.farbe} hatLogo={o.hatLogo} groesse={56} />
                     <span className="min-w-0 text-lg leading-snug font-bold group-hover:underline">{o.name}</span>
                   </span>
                   {o.beschreibung && <p className="line-clamp-3 text-sm leading-relaxed text-text-zweit">{o.beschreibung}</p>}

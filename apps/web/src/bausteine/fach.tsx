@@ -93,15 +93,25 @@ export function lesbareFarbe(farbe: string): string | null {
   return 1.05 / (helligkeit + 0.05) >= 3 ? `#${m[1]}` : null;
 }
 
+/**
+ * Ein Logo in seinem eigenen Seitenverhaeltnis: feste Hoehe, Breite bis zum Dreifachen.
+ * Im Quadrat blieben einer Wortmarke wie der von P+F (3840 x 520, also 7,4 : 1) bei 88 px
+ * nur etwa 11 px Hoehe (05.11.2026). Weisser Grund, weil Logos fuer Weiss gemacht sind.
+ */
+export function LogoFlaeche({ src, groesse }: { src: string; groesse: number }) {
+  return (
+    <span
+      className="flex shrink-0 items-center justify-center border border-linie bg-white"
+      style={{ height: groesse, maxWidth: groesse * 3, padding: Math.round(groesse * 0.12) }}
+    >
+      <img src={src} alt="" className="h-full w-auto max-w-full object-contain" />
+    </span>
+  );
+}
+
 /** Logo der Organisation oder ihr Anfangsbuchstabe in ihrer Farbe. */
 export function OrgMarke({ id, name, farbe, hatLogo, groesse = 40 }: { id: number; name: string; farbe: string; hatLogo: boolean; groesse?: number }) {
-  if (hatLogo) {
-    return (
-      <span className="flex shrink-0 items-center justify-center border border-linie bg-flaeche" style={{ width: groesse, height: groesse }}>
-        <img src={orgLogoUrl(id)} alt="" className="size-full object-contain p-1" />
-      </span>
-    );
-  }
+  if (hatLogo) return <LogoFlaeche src={orgLogoUrl(id)} groesse={groesse} />;
   return (
     <span
       aria-hidden="true"

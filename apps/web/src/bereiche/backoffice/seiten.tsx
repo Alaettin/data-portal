@@ -19,7 +19,7 @@ import {
   Textfeld,
 } from "../../bausteine/basis.tsx";
 import { Formularfenster, Rueckfrage } from "../../bausteine/dialog.tsx";
-import { OrgMarke } from "../../bausteine/fach.tsx";
+import { LogoFlaeche, OrgMarke } from "../../bausteine/fach.tsx";
 import { useT, type Uebersetzer } from "../../i18n/sprache.tsx";
 import { useKonto } from "../../konto.tsx";
 import { useStrom } from "../../strom.tsx";
@@ -410,9 +410,7 @@ function ProfilForm({ orgId, profil }: { orgId: number; profil: OrganisationProf
             <span className="text-[13px] font-semibold">{t("prof.logo")}</span>
             <div className="flex flex-wrap items-center gap-4">
               {logoVorschau ? (
-                <span className="flex size-20 items-center justify-center border border-linie bg-flaeche">
-                  <img src={logoVorschau} alt="" className="size-full object-contain p-1.5" />
-                </span>
+                <LogoFlaeche src={logoVorschau} groesse={80} />
               ) : (
                 <OrgMarke id={orgId} name={profil.name} farbe={f.farbe} hatLogo={false} groesse={80} />
               )}
