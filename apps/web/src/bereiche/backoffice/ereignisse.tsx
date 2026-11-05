@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { api, assetPfad, mitSprache, type Art, type Ereignis } from "../../api.ts";
-import { cn, Flaeche, Knopf, Segmente, Zustand } from "../../bausteine/basis.tsx";
-import { Json } from "../../bausteine/anzeige.tsx";
+import { Flaeche, Knopf, Segmente, Zustand } from "../../bausteine/basis.tsx";
+import { RohAnsicht, RohKnopf, useRohdaten } from "../../bausteine/anzeige.tsx";
 import { Aenderungen, ArtMarkierung } from "../../bausteine/fach.tsx";
 import { useT } from "../../i18n/sprache.tsx";
 import { useDaten } from "../../strom.tsx";
@@ -125,17 +125,8 @@ export function BoEreignisse() {
 }
 
 function Zeile({ e, basis, orgId }: { e: Ereignis; basis: string; orgId: number }) {
-  const { t, uhrzeit, sprache } = useT();
-  const [offen, setOffen] = useState(false);
-  const [roh, setRoh] = useState<unknown>(null);
-
-  async function umschalten() {
-    if (!offen && roh === null) {
-      const voll = await api<Ereignis>(mitSprache(`${basis}/${e.lfd}`, sprache));
-      setRoh(voll.roh ?? null);
-    }
-    setOffen(!offen);
-  }
+  const { uhrzeit } = useT();
+  const { offen, roh, umschalten } = useRohdaten(`${basis}/${e.lfd}`);
 
   return (
     <li className="border-t border-linie first:border-t-0">
@@ -153,19 +144,11 @@ function Zeile({ e, basis, orgId }: { e: Ereignis; basis: string; orgId: number 
           </Link>
           {e.aenderungen && e.aenderungen.length > 0 ? <Aenderungen liste={e.aenderungen} max={3} /> : e.zusatz && <p className="text-sm text-text-zweit">{e.zusatz}</p>}
         </div>
-        <button
-          type="button"
-          aria-expanded={offen}
-          onClick={() => void umschalten()}
-          className={cn("shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold", offen ? "border-text bg-text text-white" : "border-linie-feld text-text-hinweis hover:text-text")}
-        >
-          {t("ereig.rohZeigen")}
-        </button>
+        <RohKnopf offen={offen} aufKlick={() => void umschalten()} />
       </div>
       {offen && (
-        <div className="flex flex-col gap-2 px-5 pb-5">
-          <span className="text-[11px] font-semibold tracking-[0.08em] text-text-hinweis uppercase">{t("ereig.roh")}</span>
-          <Json wert={roh} className="max-h-[28rem]" />
+        <div className="px-5 pb-5">
+          <RohAnsicht roh={roh} />
         </div>
       )}
     </li>

@@ -23,7 +23,7 @@ import {
   type Submodel,
 } from "@datenportal/core";
 import { jetzt, type DB } from "./db.ts";
-import { AbrufFehler, datei, json } from "./holen.ts";
+import { AbrufFehler, anhang, datei, json } from "./holen.ts";
 
 type Geladen = { inhalt: Submodel | null; fehler: string | null };
 
@@ -166,27 +166,47 @@ function nenntThumbnail(shell: Shell): boolean {
   return !!shell.assetInformation?.defaultThumbnail?.path;
 }
 
-async function thumbnailLaden(db: DB, lauf: Lauf, eid: number, item: string, repo: string, aasId: string): Promise<boolean> {
-  const bild = await datei(`${repo}/shells/${encodeIdentifier(aasId)}/asset-information/thumbnail`, lauf.holen);
-  if (!bild) return false;
+/** Thumbnail holen und speichern. Gibt null bei Erfolg zurueck, sonst den Grund. */
+async function thumbnailLaden(db: DB, lauf: Lauf, eid: number, item: string, repo: string, aasId: string): Promise<string | null> {
+  let bild: { daten: Buffer; typ: string };
+  try {
+    bild = await anhang(`${repo}/shells/${encodeIdentifier(aasId)}/asset-information/thumbnail`, lauf.holen);
+  } catch (f) {
+    return fehlertext(f);
+  }
+  if (!bild.typ.startsWith("image/")) return `Kein Bild (${bild.typ})`;
   db.prepare("UPDATE assets SET bild=?, bild_typ=?, gespeichert=? WHERE endpunkt_id=? AND item_id=?").run(bild.daten, bild.typ, jetzt(), eid, item);
-  return true;
+  return null;
 }
 
-async function shellLaden(db: DB, lauf: Lauf, eid: number, item: string, repo: string, aasId: string): Promise<string | null> {
+/** Was ein Abruf des ganzen Assets ergeben hat, je Teil mit Grund. `null` heisst: nicht versucht. */
+export type AbrufBericht = {
+  shell: string | null | undefined;
+  bild: string | null | undefined;
+  teilmodelle: { id: string; fehler: string | null }[];
+};
+
+/**
+ * Shell, Thumbnail (wenn die Shell eins nennt) und alle Teilmodelle der Shell laden.
+ * `shell` im Bericht ist null bei Erfolg, sonst der Grund; `bild` ist undefined, wenn die
+ * Shell kein Thumbnail nennt.
+ */
+async function shellLaden(db: DB, lauf: Lauf, eid: number, item: string, repo: string, aasId: string): Promise<AbrufBericht> {
   let shell: Shell;
   try {
     shell = await json(`${repo}/shells/${encodeIdentifier(aasId)}`, lauf.holen);
   } catch (f) {
-    return fehlertext(f);
+    return { shell: fehlertext(f), bild: undefined, teilmodelle: [] };
   }
   db.prepare("UPDATE assets SET shell=?, gespeichert=? WHERE endpunkt_id=? AND item_id=?").run(JSON.stringify(shell), jetzt(), eid, item);
 
-  if (nenntThumbnail(shell)) await thumbnailLaden(db, lauf, eid, item, repo, aasId);
+  const bild = nenntThumbnail(shell) ? await thumbnailLaden(db, lauf, eid, item, repo, aasId) : undefined;
 
   // Alle Submodelle der Shell einmal laden, damit das Asset-Detail vollstaendig ist.
-  await Promise.all(submodelIds(shell).map((id) => submodelUebernehmen(db, lauf, eid, item, repo, id, null, false)));
-  return null;
+  const teilmodelle = await Promise.all(
+    submodelIds(shell).map(async (id) => ({ id, fehler: (await submodelUebernehmen(db, lauf, eid, item, repo, id, null, false)).fehler })),
+  );
+  return { shell: null, bild, teilmodelle };
 }
 
 export type EventZeile = {
@@ -203,22 +223,48 @@ export type EventZeile = {
   eingegangen: string;
 };
 
-/** Nachladen fuer ein Asset nach einem schnellen Nachlesen: Shell, alle Submodelle, Bilder. */
-export async function anreichern(db: DB, lauf: Lauf, eid: number, item: string): Promise<void> {
+/**
+ * Das ganze Asset neu abrufen: Shell, Thumbnail und alle Teilmodelle, oder ohne `aas.created`
+ * die Teilmodelle aus den Events. Laeuft nach einem schnellen Nachlesen (`anreichern`) und auf
+ * Knopfdruck im Backoffice. Ein gescheiterter Abruf ueberschreibt keinen vorhandenen Inhalt.
+ * Gibt null zurueck, wenn das Asset nicht existiert oder keine Repository-Adresse hat.
+ */
+export async function assetNeuAbrufen(db: DB, lauf: Lauf, eid: number, item: string): Promise<AbrufBericht | null> {
   const a = db.prepare("SELECT aas_id, repo_url FROM assets WHERE endpunkt_id=? AND item_id=?").get(eid, item) as
     | { aas_id: string | null; repo_url: string | null }
     | undefined;
-  if (!a?.repo_url) return;
-  if (a.aas_id) {
-    await shellLaden(db, lauf, eid, item, a.repo_url, a.aas_id);
-    return;
-  }
+  if (!a?.repo_url) return null;
+  if (a.aas_id) return shellLaden(db, lauf, eid, item, a.repo_url, a.aas_id);
+
   // Ohne aas.created: wenigstens die Submodelle aus den Events laden.
-  const ids = db.prepare("SELECT DISTINCT roh FROM events WHERE endpunkt_id=? AND item_id=? AND art LIKE 'submodel-%'").all(eid, item) as { roh: string }[];
-  for (const { roh } of ids) {
+  const zeilen = db.prepare("SELECT DISTINCT roh FROM events WHERE endpunkt_id=? AND item_id=? AND art LIKE 'submodel-%'").all(eid, item) as { roh: string }[];
+  const gesehen = new Set<string>();
+  const teilmodelle: AbrufBericht["teilmodelle"] = [];
+  for (const { roh } of zeilen) {
     const e = JSON.parse(roh) as CloudEvent;
-    await submodelUebernehmen(db, lauf, eid, item, a.repo_url, (e.data?.["submodelId"] as string | undefined) ?? e.subject, semanticIdVon(e), false);
+    const id = (e.data?.["submodelId"] as string | undefined) ?? e.subject;
+    if (gesehen.has(id)) continue;
+    gesehen.add(id);
+    teilmodelle.push({ id, fehler: (await submodelUebernehmen(db, lauf, eid, item, a.repo_url, id, semanticIdVon(e), false)).fehler });
   }
+  return { shell: undefined, bild: undefined, teilmodelle };
+}
+
+export async function anreichern(db: DB, lauf: Lauf, eid: number, item: string): Promise<void> {
+  await assetNeuAbrufen(db, lauf, eid, item);
+}
+
+/** Ein Teilmodell neu abrufen. Null, wenn es zu diesem Asset kein solches Teilmodell gibt. */
+export async function teilmodellNeuAbrufen(db: DB, lauf: Lauf, eid: number, item: string, smId: string): Promise<{ fehler: string | null } | null> {
+  const z = db
+    .prepare(
+      `SELECT s.semantic_id, a.repo_url FROM submodelle s JOIN assets a ON a.endpunkt_id = s.endpunkt_id AND a.item_id = s.item_id
+       WHERE s.endpunkt_id=? AND s.item_id=? AND s.submodel_id=?`,
+    )
+    .get(eid, item, smId) as { semantic_id: string | null; repo_url: string | null } | undefined;
+  if (!z?.repo_url) return null;
+  const r = await submodelUebernehmen(db, lauf, eid, item, z.repo_url, smId, z.semantic_id, false);
+  return { fehler: r.fehler };
 }
 
 /**
@@ -240,10 +286,10 @@ export async function nachholen(db: DB, lauf: Lauf, eid: number, hoechstens = 20
     if (rest <= 0) return geholt;
     if (a.aas_id && !a.shell) {
       rest--;
-      if ((await shellLaden(db, lauf, eid, a.item_id, a.repo_url, a.aas_id)) === null) geholt++;
+      if ((await shellLaden(db, lauf, eid, a.item_id, a.repo_url, a.aas_id)).shell === null) geholt++;
     } else if (a.aas_id && a.shell && !a.hatBild && nenntThumbnail(JSON.parse(a.shell) as Shell)) {
       rest--;
-      if (await thumbnailLaden(db, lauf, eid, a.item_id, a.repo_url, a.aas_id)) geholt++;
+      if ((await thumbnailLaden(db, lauf, eid, a.item_id, a.repo_url, a.aas_id)) === null) geholt++;
     }
   }
 
@@ -293,7 +339,7 @@ export async function uebernehmen(db: DB, lauf: Lauf, eid: number, event: CloudE
 
   if (art === "registriert") {
     const aasId = registrieren(db, eid, item, event);
-    if (abrufen) fehler = await shellLaden(db, lauf, eid, item, repo, aasId);
+    if (abrufen) fehler = (await shellLaden(db, lauf, eid, item, repo, aasId)).shell ?? null;
   } else if (art === "submodel-neu" || art === "submodel-geaendert") {
     // Beim schnellen Nachlesen laedt `anreichern` das Submodell danach.
     const smId = (event.data?.["submodelId"] as string | undefined) ?? event.subject;

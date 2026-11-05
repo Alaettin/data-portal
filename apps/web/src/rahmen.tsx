@@ -57,10 +57,24 @@ export function Liveanzeige() {
   );
 }
 
-export function Rahmen({ reiter, markenziel, rechts, menueExtras }: { reiter: Reiter[]; markenziel: string; rechts: ReactNode; menueExtras: { text: string; aktion: () => void }[] }) {
+export function Rahmen({
+  reiter,
+  markenziel,
+  rechts,
+  menueExtras,
+  band,
+}: {
+  reiter: Reiter[];
+  markenziel: string;
+  rechts: ReactNode;
+  menueExtras: { text: string; aktion: () => void }[];
+  /** Zeile ueber dem Kopf, die sagt, in welchem Bereich man ist (Backoffice). */
+  band?: ReactNode;
+}) {
   const { t } = useT();
   return (
     <div className="min-h-[100dvh] bg-grund text-text">
+      {band}
       <header className="bg-flaeche">
         <div className="flex min-h-14 items-center gap-3 border-b border-linie px-4 sm:gap-4 sm:px-6">
           <Marke art="kopf" ziel={markenziel} />
@@ -163,6 +177,7 @@ export function BesucherRahmen() {
           <Sprachwahl />
           <Link to={ziel} className={knopfKlassen(nutzer ? "primaer" : "rand", "h-[34px] px-3.5 text-[13px]")}>
             {text}
+            {nutzer && <span aria-hidden="true">→</span>}
           </Link>
         </>
       }

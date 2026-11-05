@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { Link } from "react-router";
-import { api, ApiFehler, type Endpunkt, type OrganisationProfil } from "../../api.ts";
+import { api, fehlertext, type Endpunkt, type OrganisationProfil } from "../../api.ts";
 import {
   Abschnitt,
   Auswahl,
@@ -26,12 +26,6 @@ import { useStrom } from "../../strom.tsx";
 import { AssetDetail } from "../besucher/asset-detail.tsx";
 import { OrgAnsicht } from "../besucher/organisationen.tsx";
 import { useOrg } from "./rahmen.tsx";
-
-/** Fehler einer Aktion als Klartext. */
-export function fehlertext(f: unknown, u: Uebersetzer): string {
-  if (f instanceof ApiFehler) return u.fehler(f.code, { grund: f.grund ?? "", status: f.status });
-  return u.fehler("verbindung");
-}
 
 // ---------- Organisationsseite ----------
 
@@ -62,7 +56,7 @@ export function BoOrgSeite() {
 export function BoAssetDetail() {
   const { orgId } = useOrg();
   const { t } = useT();
-  return <AssetDetail zurueck={{ pfad: `/backoffice/${orgId}`, text: `← ${t("bo.organisationsseite")}` }} />;
+  return <AssetDetail zurueck={{ pfad: `/backoffice/${orgId}`, text: `← ${t("bo.organisationsseite")}` }} backoffice={{ orgId }} />;
 }
 
 /** Takt in Zahl und Einheit zerlegen: 7200 s → 2 h, 120 s → 2 min, 90 s → 90 s. */

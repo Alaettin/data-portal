@@ -170,6 +170,60 @@ describe("Nachholen nach Abbruch", () => {
   });
 });
 
+describe("Neu abrufen im Backoffice", () => {
+  it("berichtet je Teil mit Grund und ueberschreibt bei einem Ausfall nichts", async () => {
+    const r = repository();
+    t = await baue(r.holen);
+    const admin = await anmelden(t.app, ADMIN.email, ADMIN.passwort);
+    const a = await organisationMitNutzer(t.app, admin, "Alpha", "a@example.invalid");
+    const b = await organisationMitNutzer(t.app, admin, "Beta", "b@example.invalid");
+    const e = await t.app.inject({
+      method: "POST",
+      url: `/api/backoffice/${a.orgId}/endpunkte`,
+      headers: { cookie: a.cookie },
+      payload: { name: "Repo", feedUrl: `${REPO}/api/v3/events`, aktiv: false },
+    });
+    const eid = (e.json() as { id: number }).id;
+    await t.app.inject({ method: "POST", url: `/api/backoffice/${a.orgId}/endpunkte/${eid}/lesen`, headers: { cookie: a.cookie } });
+
+    type Bericht = { shell: string | null; bild: string | null; teilmodelle: { id: string; name: string; fehler: string | null }[] };
+    const asset = (cookie: string, org: number) =>
+      t!.app.inject({ method: "POST", url: `/api/backoffice/${org}/assets/${eid}/4711/abrufen`, headers: { cookie } });
+    const teilmodell = (cookie: string) =>
+      t!.app.inject({
+        method: "POST",
+        url: `/api/backoffice/${a.orgId}/assets/${eid}/4711/teilmodelle/abrufen?sm=${encodeURIComponent(SM)}`,
+        headers: { cookie },
+      });
+    const inhalt = async () =>
+      ((await t!.app.inject({ url: `/api/assets/${eid}/4711` })).json() as { submodelle: { inhalt: unknown }[] }).submodelle[0]!.inhalt;
+
+    // Repository faellt aus: Shell kommt, Bild und Teilmodell nicht, jeweils mit Grund.
+    const kaputt = (await asset(a.cookie, a.orgId)).json() as Bericht;
+    expect(kaputt.shell).toBeNull();
+    expect(kaputt.bild).toMatch(/503/);
+    expect(kaputt.teilmodelle).toHaveLength(1);
+    expect(kaputt.teilmodelle[0]!.fehler).toMatch(/503/);
+    expect(kaputt.teilmodelle[0]!.name.length).toBeGreaterThan(0);
+
+    r.zustand.ausfall = false;
+    const gut = (await asset(a.cookie, a.orgId)).json() as Bericht;
+    expect(gut).toMatchObject({ shell: null, bild: null, teilmodelle: [{ id: SM, fehler: null }] });
+    expect(await inhalt()).not.toBeNull();
+
+    // Ein erneuter Ausfall meldet den Grund, laesst aber den gespeicherten Inhalt stehen.
+    r.zustand.ausfall = true;
+    const einzeln = await teilmodell(a.cookie);
+    expect(einzeln.statusCode).toBe(200);
+    expect((einzeln.json() as { fehler: string | null }).fehler).toMatch(/503/);
+    expect(await inhalt()).not.toBeNull();
+
+    // Eine fremde Organisation kommt nicht an das Asset.
+    expect((await asset(b.cookie, b.orgId)).statusCode).toBe(404);
+    expect((await asset(b.cookie, a.orgId)).statusCode).toBe(404);
+  });
+});
+
 describe("Datenbank-Fassung 4", () => {
   it("behaelt den Bestand einer Fassung-3-DB und laesst vorhandene Organisationen oeffentlich", () => {
     const ordner = mkdtempSync(join(tmpdir(), "adp-"));

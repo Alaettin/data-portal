@@ -1,4 +1,6 @@
+import type { CSSProperties } from "react";
 import { Link, Navigate, NavLink, Outlet, useNavigate, useOutletContext, useParams } from "react-router";
+import { lesbareFarbe } from "../../bausteine/fach.tsx";
 import type { Endpunkt, Kennzahlen, OrganisationProfil } from "../../api.ts";
 import { Auswahl, cn, Knopf, knopfKlassen, Seitenkopf, Zustand } from "../../bausteine/basis.tsx";
 import type { Schluessel } from "../../i18n/de.ts";
@@ -38,12 +40,25 @@ export function BackofficeRahmen({ nurAdmin = false }: { nurAdmin?: boolean }) {
     <Rahmen
       reiter={reiter}
       markenziel={admin ? "/verwaltung/organisationen" : `/backoffice/${konto.organisation?.id ?? ""}`}
+      band={
+        // Dunkles Band: man sieht immer, dass man im Backoffice ist, und kommt mit einem Klick
+        // ins oeffentliche Portal (Nutzervorgabe 05.11.2026, vorher nur ein Textlink im Kopf).
+        <div className="bg-text text-white">
+          <div className="flex min-h-10 items-center gap-3 px-4 text-[13px] sm:px-6">
+            <span className="min-w-0 truncate">
+              <b className="font-bold tracking-[0.08em] uppercase">{t("nav.backoffice")}</b>
+              <span className="text-white/70"> · {admin ? t("nav.verwaltung") : (konto.organisation?.name ?? "")}</span>
+            </span>
+            <Link to="/" className="ml-auto inline-flex shrink-0 items-center gap-1.5 font-semibold underline-offset-4 hover:underline">
+              {t("nav.zumOeffentlichen")}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        </div>
+      }
       rechts={
         <>
           <Liveanzeige />
-          <Link to="/" className="text-sm font-semibold text-text-hinweis hover:text-text">
-            {t("nav.zumPortal")}
-          </Link>
           <Sprachwahl />
           <span className="hidden max-w-[14rem] min-w-0 truncate text-sm font-medium md:inline">{konto.nutzer.name}</span>
           <Knopf art="rand" className="h-[34px] px-3.5 text-[13px]" onClick={() => void abmelden()}>
@@ -124,7 +139,12 @@ export function OrgBereich() {
               </div>
             }
           />
-          <nav aria-label={t("bo.augenbraue")} className="flex gap-1 overflow-x-auto border-b border-linie">
+          {/* Der aktive Reiter traegt die Hauptfarbe der Organisation (bei zu heller Farbe den Standard). */}
+          <nav
+            aria-label={t("bo.augenbraue")}
+            className="flex gap-1 overflow-x-auto border-b border-linie"
+            style={{ "--reiter": lesbareFarbe(daten.organisation.farbe) ?? "var(--color-primaer)" } as CSSProperties}
+          >
             {UNTERREITER.map((r) => (
               <NavLink
                 key={r.pfad}
@@ -133,7 +153,7 @@ export function OrgBereich() {
                 className={({ isActive }) =>
                   cn(
                     "flex h-11 shrink-0 items-center px-4 text-sm",
-                    isActive ? "font-semibold text-text shadow-[inset_0_-2px_0_var(--color-primaer)]" : "font-medium text-text-hinweis hover:text-text",
+                    isActive ? "font-semibold text-text shadow-[inset_0_-3px_0_var(--reiter)]" : "font-medium text-text-hinweis hover:text-text",
                   )
                 }
               >

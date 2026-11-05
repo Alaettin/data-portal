@@ -4,6 +4,7 @@
  */
 
 import type { Aenderung, PcnZusammenfassung } from "@datenportal/core";
+import type { Uebersetzer } from "./i18n/sprache.tsx";
 
 export class ApiFehler extends Error {
   constructor(
@@ -35,6 +36,12 @@ export async function api<T>(pfad: string, optionen: { methode?: string; koerper
     throw new ApiFehler(f.fehler ?? (antwort.status === 429 ? "zu-viele" : String(antwort.status)), antwort.status, f.grund ?? null);
   }
   return daten as T;
+}
+
+/** Fehler einer Aktion als Klartext in der aktuellen Sprache. */
+export function fehlertext(f: unknown, u: Uebersetzer): string {
+  if (f instanceof ApiFehler) return u.fehler(f.code, { grund: f.grund ?? "", status: f.status });
+  return u.fehler("verbindung");
 }
 
 /** Haengt die Sprache an, damit Saetze und Klartexte passend vom Server kommen. */

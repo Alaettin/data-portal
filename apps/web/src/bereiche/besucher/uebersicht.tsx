@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { assetPfad, type AssetKurz, type Kennzahlen } from "../../api.ts";
-import { Abschnitt, cn, Kennzahlenreihe, Seitenkopf, Zustand } from "../../bausteine/basis.tsx";
+import { Abschnitt, cn, Kennzahlenreihe, Zustand } from "../../bausteine/basis.tsx";
 import { OrgLink, Produktbild } from "../../bausteine/fach.tsx";
 import { useT } from "../../i18n/sprache.tsx";
 import { frischSchluessel, useDaten, useStrom } from "../../strom.tsx";
@@ -12,7 +12,8 @@ export function Uebersicht() {
 
   return (
     <>
-      <Seitenkopf augenbraue={t("dash.augenbraue")} titel={t("dash.titel")} unter={t("dash.unter")} />
+      {/* Ohne sichtbaren Kopf (Nutzervorgabe 05.11.2026); die Ueberschrift bleibt fuer Screenreader. */}
+      <h1 className="sr-only">{t("nav.uebersicht")}</h1>
       <Kennzahlenreihe
         werte={[
           { zahl: kz ? zahl(kz.assets) : "·", text: t("kz.assets") },
@@ -42,7 +43,7 @@ function NeuRegistriert() {
           {daten?.map((a) => (
             <li key={`${a.endpunktId}/${a.itemId}`}>
               <div className={cn("flex h-full gap-3 border border-linie p-3 transition-colors hover:border-linie-feld", frisch.has(frischSchluessel(a)) && "neu-eingetroffen")}>
-                <Produktbild a={a} groesse={56} />
+                <Produktbild a={a} groesse={72} />
                 <div className="flex min-w-0 flex-col gap-1">
                   <Link to={assetPfad(a)} className="line-clamp-2 leading-snug font-semibold hover:underline">
                     {a.name ?? a.itemId}

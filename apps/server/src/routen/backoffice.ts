@@ -6,7 +6,7 @@
  */
 
 import type { FastifyInstance } from "fastify";
-import type { FeedSeite } from "@datenportal/core";
+import { submodelAnzeigename, submodelNameVon, type FeedSeite } from "@datenportal/core";
 import {
   endpunktAnsicht,
   EVENT_SQL,
@@ -22,6 +22,7 @@ import { angemeldet, organisationPruefen, organisationVon } from "../auth/waecht
 import { jetzt } from "../db.ts";
 import { json } from "../holen.ts";
 import { feedSeitenUrl } from "../takt.ts";
+import { assetNeuAbrufen, neuerLauf, teilmodellNeuAbrufen } from "../verarbeitung.ts";
 import { Eingabefehler, email, farbe, intervall, logo, pflichttext, sprache, textOderNull, webadresse } from "./hilfen.ts";
 import type { Kontext } from "./kontext.ts";
 
@@ -190,6 +191,46 @@ export function backofficeRouten(app: FastifyInstance, k: Kontext) {
       k.strom.senden({ typ: "bestand" });
       return { ok: true };
     });
+
+    /** Anzeigename je Teilmodell aus dem gespeicherten Stand, fuer den Bericht. */
+    const teilmodellName = (eid: number, item: string, smId: string, s: ReturnType<typeof sprache>) => {
+      const z = db.prepare("SELECT semantic_id, id_short FROM submodelle WHERE endpunkt_id=? AND item_id=? AND submodel_id=?").get(eid, item, smId) as
+        | { semantic_id: string | null; id_short: string | null }
+        | undefined;
+      return submodelAnzeigename(z?.semantic_id ?? null, z?.id_short ?? submodelNameVon(smId) ?? null, s);
+    };
+
+    /**
+     * Das ganze Asset beim Hersteller neu abrufen (Shell, Bild, alle Teilmodelle) und je Teil
+     * berichten, was geklappt hat und warum nicht. Die Organisation muss den Endpunkt besitzen.
+     */
+    bereich.post<{ Params: { eid: string; item: string } }>("/api/backoffice/:orgId/assets/:eid/:item/abrufen", async (req, reply) => {
+      const e = endpunkt(organisationVon(req), Number(req.params.eid));
+      if (!e) return reply.code(404).send({ fehler: "nicht-gefunden" });
+      const item = req.params.item;
+      const bericht = await assetNeuAbrufen(db, neuerLauf(k.holen), e.id, item);
+      if (!bericht) return reply.code(404).send({ fehler: "nicht-gefunden" });
+      k.strom.senden({ typ: "bestand" });
+      const s = sprache(req);
+      return {
+        shell: bericht.shell,
+        bild: bericht.bild,
+        teilmodelle: bericht.teilmodelle.map((t) => ({ ...t, name: teilmodellName(e.id, item, t.id, s) })),
+      };
+    });
+
+    bereich.post<{ Params: { eid: string; item: string }; Querystring: { sm?: string } }>(
+      "/api/backoffice/:orgId/assets/:eid/:item/teilmodelle/abrufen",
+      async (req, reply) => {
+        const e = endpunkt(organisationVon(req), Number(req.params.eid));
+        if (!e) return reply.code(404).send({ fehler: "nicht-gefunden" });
+        const sm = req.query.sm ?? "";
+        const r = await teilmodellNeuAbrufen(db, neuerLauf(k.holen), e.id, req.params.item, sm);
+        if (!r) return reply.code(404).send({ fehler: "nicht-gefunden" });
+        k.strom.senden({ typ: "bestand" });
+        return { id: sm, name: teilmodellName(e.id, req.params.item, sm, sprache(req)), fehler: r.fehler };
+      },
+    );
 
     bereich.delete<{ Params: { eid: string; item: string } }>("/api/backoffice/:orgId/assets/:eid/:item", async (req, reply) => {
       const e = endpunkt(organisationVon(req), Number(req.params.eid));

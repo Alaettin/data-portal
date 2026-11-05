@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { api } from "../../api.ts";
-import { Auswahl, Beschriftet, Eingabe, Kopfzelle, Knopf, Markierung, Monowert, Reihe, Seitenkopf, Tabellenflaeche, Zelle, Zustand } from "../../bausteine/basis.tsx";
+import { api, fehlertext } from "../../api.ts";
+import { Auswahl, Beschriftet, Eingabe, Kopfzelle, Knopf, Markierung, Monowert, Reihe, Segmente, Seitenkopf, Tabellenflaeche, Zelle, Zustand } from "../../bausteine/basis.tsx";
 import { Formularfenster, Rueckfrage, Schaufenster } from "../../bausteine/dialog.tsx";
 import { Symbolknopf, Symbolreihe } from "../../bausteine/symbole.tsx";
 import { useT } from "../../i18n/sprache.tsx";
 import { useKonto } from "../../konto.tsx";
 import { useDaten, useStrom } from "../../strom.tsx";
-import { fehlertext } from "../backoffice/seiten.tsx";
 
 type OrgZeile = { id: number; slug: string; name: string; farbe: string; angelegt: string; nutzer: number; endpunkte: number; assets: number };
 type NutzerZeile = {
@@ -194,35 +193,44 @@ export function VerwNutzer() {
   const { daten, fehler, laedt } = useDaten<NutzerZeile[]>("/api/admin/nutzer");
   const orgs = useDaten<OrgZeile[]>("/api/admin/organisationen").daten;
   const a = useAktion();
-  const [formular, setFormular] = useState<{ name: string; email: string; organisationId: string } | null>(null);
-  const [frage, setFrage] = useState<{ art: "passwort" | "loeschen"; n: NutzerZeile } | null>(null);
-  const [startpasswort, setStartpasswort] = useState<{ name: string; email: string; passwort: string } | null>(null);
+  const [formular, setFormular] = useState<{ name: string; email: string; organisationId: string; passwort: string } | null>(null);
+  const [frage, setFrage] = useState<{ art: "loeschen"; n: NutzerZeile } | null>(null);
+  const [pw, setPw] = useState<{ n: NutzerZeile; weg: "zufall" | "eigen"; neu: string; wieder: string } | null>(null);
+  /** Nach dem Anlegen oder Aendern: das Startpasswort zum Notieren, oder ohne `passwort` nur die Bestaetigung. */
+  const [ergebnis, setErgebnis] = useState<{ name: string; email: string; passwort?: string } | null>(null);
 
   async function anlegen() {
     if (!formular) return;
     const r = await a.ausfuehren(() =>
-      api<{ nutzer: NutzerZeile; startpasswort: string }>("/api/admin/nutzer", {
+      api<{ nutzer: NutzerZeile; startpasswort?: string }>("/api/admin/nutzer", {
         methode: "POST",
-        koerper: { name: formular.name, email: formular.email, organisationId: Number(formular.organisationId) },
+        koerper: { name: formular.name, email: formular.email, organisationId: Number(formular.organisationId), passwort: formular.passwort || undefined },
       }),
     );
     if (r) {
       setFormular(null);
-      setStartpasswort({ name: r.nutzer.name, email: r.nutzer.email, passwort: r.startpasswort });
+      setErgebnis({ name: r.nutzer.name, email: r.nutzer.email, passwort: r.startpasswort });
     }
   }
 
-  async function bestaetigen() {
+  async function loeschen() {
     if (!frage) return;
-    if (frage.art === "loeschen") {
-      const r = await a.ausfuehren(() => api(`/api/admin/nutzer/${frage.n.id}`, { methode: "DELETE" }));
-      if (r) setFrage(null);
-      return;
-    }
-    const r = await a.ausfuehren(() => api<{ startpasswort: string }>(`/api/admin/nutzer/${frage.n.id}/passwort`, { methode: "POST" }));
+    const r = await a.ausfuehren(() => api(`/api/admin/nutzer/${frage.n.id}`, { methode: "DELETE" }));
+    if (r) setFrage(null);
+  }
+
+  async function passwortAendern() {
+    if (!pw) return;
+    if (pw.weg === "eigen" && pw.neu !== pw.wieder) return a.setFehler(t("konto.ungleich"));
+    const r = await a.ausfuehren(() =>
+      api<{ startpasswort?: string }>(`/api/admin/nutzer/${pw.n.id}/passwort`, {
+        methode: "POST",
+        koerper: pw.weg === "eigen" ? { passwort: pw.neu } : {},
+      }),
+    );
     if (r) {
-      setStartpasswort({ name: frage.n.name, email: frage.n.email, passwort: r.startpasswort });
-      setFrage(null);
+      setErgebnis({ name: pw.n.name, email: pw.n.email, passwort: r.startpasswort });
+      setPw(null);
     }
   }
 
@@ -239,7 +247,7 @@ export function VerwNutzer() {
             title={keineOrg ? t("verw.ersteOrgZuerst") : undefined}
             onClick={() => {
               a.setFehler(null);
-              setFormular({ name: "", email: "", organisationId: "" });
+              setFormular({ name: "", email: "", organisationId: "", passwort: "" });
             }}
           >
             {t("verw.nutzerNeu")}
@@ -290,10 +298,10 @@ export function VerwNutzer() {
                           />
                           <Symbolknopf
                             symbol="passwort"
-                            beschriftung={t("verw.passwortZuruecksetzen")}
+                            beschriftung={t("verw.passwortAendern")}
                             onClick={() => {
                               a.setFehler(null);
-                              setFrage({ art: "passwort", n });
+                              setPw({ n, weg: "zufall", neu: "", wieder: "" });
                             }}
                           />
                           <Symbolknopf
@@ -342,6 +350,67 @@ export function VerwNutzer() {
                 ))}
               </Auswahl>
             </Beschriftet>
+            <Eingabe
+              titel={t("verw.pwOptional")}
+              hinweis={t("verw.pwOptionalHinweis")}
+              type="password"
+              autoComplete="new-password"
+              minLength={12}
+              value={formular.passwort}
+              onChange={(e) => setFormular({ ...formular, passwort: e.target.value })}
+            />
+          </>
+        )}
+      </Formularfenster>
+
+      <Formularfenster
+        offen={pw !== null}
+        aufOffen={(o) => !o && setPw(null)}
+        titel={pw ? `${t("verw.passwortAendern")}: ${pw.n.name}` : ""}
+        absendenText={t("verw.passwortAendern")}
+        laeuft={a.laeuft}
+        fehler={a.fehler}
+        aufAbsenden={() => void passwortAendern()}
+      >
+        {pw && (
+          <>
+            <Segmente<"zufall" | "eigen">
+              beschriftung={t("verw.pwWeg")}
+              wert={pw.weg}
+              aufWahl={(weg) => {
+                a.setFehler(null);
+                setPw({ ...pw, weg });
+              }}
+              werte={[
+                { wert: "zufall", text: t("verw.pwZufall") },
+                { wert: "eigen", text: t("verw.pwEigen") },
+              ]}
+            />
+            {pw.weg === "zufall" ? (
+              <p className="text-[15px] leading-relaxed text-text-zweit">{t("verw.pwZufallHinweis", { name: pw.n.name })}</p>
+            ) : (
+              <>
+                <Eingabe
+                  titel={t("verw.pwNeu")}
+                  hinweis={t("verw.pwEigenHinweis", { name: pw.n.name })}
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={12}
+                  value={pw.neu}
+                  onChange={(e) => setPw({ ...pw, neu: e.target.value })}
+                  autoFocus
+                  required
+                />
+                <Eingabe
+                  titel={t("verw.pwWieder")}
+                  type="password"
+                  autoComplete="new-password"
+                  value={pw.wieder}
+                  onChange={(e) => setPw({ ...pw, wieder: e.target.value })}
+                  required
+                />
+              </>
+            )}
           </>
         )}
       </Formularfenster>
@@ -349,25 +418,32 @@ export function VerwNutzer() {
       <Rueckfrage
         offen={frage !== null}
         aufOffen={(o) => !o && setFrage(null)}
-        titel={frage?.art === "loeschen" ? t("verw.nutzerLoeschen") : t("verw.passwortZuruecksetzen")}
-        bestaetigenText={frage?.art === "loeschen" ? t("allg.loeschen") : t("verw.passwortZuruecksetzen")}
-        art={frage?.art === "loeschen" ? "gefahr" : "primaer"}
+        titel={t("verw.nutzerLoeschen")}
+        bestaetigenText={t("allg.loeschen")}
+        art="gefahr"
         laeuft={a.laeuft}
         fehler={a.fehler}
-        aufBestaetigen={() => void bestaetigen()}
+        aufBestaetigen={() => void loeschen()}
       >
-        <p>{frage && (frage.art === "loeschen" ? t("verw.nutzerLoeschenFrage", { name: frage.n.name }) : t("verw.zuruecksetzenFrage", { name: frage.n.name }))}</p>
+        <p>{frage && t("verw.nutzerLoeschenFrage", { name: frage.n.name })}</p>
       </Rueckfrage>
 
-      <Schaufenster offen={startpasswort !== null} aufOffen={(o) => !o && setStartpasswort(null)} titel={startpasswort ? t("verw.startpasswortTitel", { name: startpasswort.name }) : ""}>
-        {startpasswort && (
-          <div className="flex flex-col gap-4">
-            <p className="text-[15px] leading-relaxed text-text-zweit">{t("verw.startpasswortHinweis", { email: startpasswort.email })}</p>
-            <div className="bg-grund px-4 py-3 text-base">
-              <Monowert wert={startpasswort.passwort} />
+      <Schaufenster
+        offen={ergebnis !== null}
+        aufOffen={(o) => !o && setErgebnis(null)}
+        titel={ergebnis ? (ergebnis.passwort ? t("verw.startpasswortTitel", { name: ergebnis.name }) : t("verw.pwGesetztTitel", { name: ergebnis.name })) : ""}
+      >
+        {ergebnis &&
+          (ergebnis.passwort ? (
+            <div className="flex flex-col gap-4">
+              <p className="text-[15px] leading-relaxed text-text-zweit">{t("verw.startpasswortHinweis", { email: ergebnis.email })}</p>
+              <div className="bg-grund px-4 py-3 text-base">
+                <Monowert wert={ergebnis.passwort} />
+              </div>
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-[15px] leading-relaxed text-text-zweit">{t("verw.pwGesetztText", { email: ergebnis.email })}</p>
+          ))}
       </Schaufenster>
     </>
   );

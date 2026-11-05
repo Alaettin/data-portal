@@ -40,16 +40,20 @@ export function AssetStatus({ a }: { a: AssetKurz }) {
   return <span className="flex flex-wrap gap-1.5 max-sm:justify-end">{teile}</span>;
 }
 
-/** Produktbild oder ein ruhiger Platzhalter mit Symbol, quadratisch. */
+/**
+ * Produktbild oder ein ruhiger Platzhalter mit Symbol, quadratisch. Weisser Grund und
+ * `mix-blend-multiply`: Produktfotos haben meist einen weissen oder fast weissen Rand, der
+ * sonst als hellgrauer Kasten im Rahmen stand. Der Innenabstand waechst mit der Groesse.
+ */
 export function Produktbild({ a, groesse = 48, className }: { a: AssetKurz; groesse?: number; className?: string }) {
   const { t } = useT();
   return (
     <span
-      className={cn("flex shrink-0 items-center justify-center overflow-hidden border border-linie bg-flaeche", className)}
-      style={{ width: groesse, height: groesse }}
+      className={cn("flex shrink-0 items-center justify-center overflow-hidden border border-linie bg-white", className)}
+      style={{ width: groesse, height: groesse, padding: Math.round(groesse * 0.07) }}
     >
       {a.hatBild ? (
-        <img src={bildUrl(a)} alt="" className="size-full object-contain p-1" loading="lazy" />
+        <img src={bildUrl(a)} alt="" className="size-full object-contain mix-blend-multiply" loading="lazy" />
       ) : (
         <svg
           width={groesse * 0.45}
@@ -71,6 +75,22 @@ export function Produktbild({ a, groesse = 48, className }: { a: AssetKurz; groe
       )}
     </span>
   );
+}
+
+/**
+ * Die Organisationsfarbe als Akzent fuer Text und Linien auf weissem Grund, oder null, wenn
+ * sie dafuer zu hell ist (Kontrast unter 3:1, WCAG fuer grossen und fetten Text). Dann bleibt
+ * der Standardakzent. Flaechen und Baender nehmen die Farbe immer.
+ */
+export function lesbareFarbe(farbe: string): string | null {
+  const m = /^#?([0-9a-f]{6})$/i.exec(farbe.trim());
+  if (!m) return null;
+  const kanal = (i: number) => {
+    const c = parseInt(m[1]!.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  const helligkeit = 0.2126 * kanal(0) + 0.7152 * kanal(2) + 0.0722 * kanal(4);
+  return 1.05 / (helligkeit + 0.05) >= 3 ? `#${m[1]}` : null;
 }
 
 /** Logo der Organisation oder ihr Anfangsbuchstabe in ihrer Farbe. */

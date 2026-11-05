@@ -5,7 +5,7 @@
 
 import type { FastifyInstance } from "fastify";
 import { kennzahlen, type OrganisationZeile } from "../ansicht.ts";
-import { erzeugeStartpasswort, hashePasswort } from "../auth/passwort.ts";
+import { erzeugeStartpasswort, hashePasswort, MIN_PASSWORTLAENGE } from "../auth/passwort.ts";
 import { sitzungenEntziehen } from "../auth/sitzung.ts";
 import { angemeldet, nurAdmin, nutzerVon } from "../auth/waechter.ts";
 import { jetzt } from "../db.ts";
@@ -30,6 +30,13 @@ const NUTZER_SQL = `
   FROM nutzer n LEFT JOIN organisationen o ON o.id = n.organisation_id`;
 
 const nutzerAnsicht = (n: NutzerZeile) => ({ ...n, aktiv: n.aktiv === 1 });
+
+/** Vom Admin gewaehltes Passwort: leer oder fehlend heisst "erzeugen", sonst mindestens 12 Zeichen. */
+function gewaehltesPasswort(wert: unknown): string | null {
+  if (wert === undefined || wert === null || wert === "") return null;
+  if (typeof wert !== "string" || wert.length < MIN_PASSWORTLAENGE) throw new Eingabefehler("passwort-zu-kurz");
+  return wert;
+}
 
 export function verwaltungRouten(app: FastifyInstance, k: Kontext) {
   const { db } = k;
@@ -92,18 +99,20 @@ export function verwaltungRouten(app: FastifyInstance, k: Kontext) {
       (db.prepare(`${NUTZER_SQL} ORDER BY n.rolle, o.name COLLATE NOCASE, n.name COLLATE NOCASE`).all() as NutzerZeile[]).map(nutzerAnsicht),
     );
 
-    bereich.post<{ Body: { email?: string; name?: string; organisationId?: number } }>("/api/admin/nutzer", async (req, reply) => {
+    bereich.post<{ Body: { email?: string; name?: string; organisationId?: number; passwort?: string } }>("/api/admin/nutzer", async (req, reply) => {
       const b = req.body ?? {};
       const adresse = email(b.email);
       const name = pflichttext(b.name, "name-fehlt");
       const orgId = Number(b.organisationId);
       if (!organisation(orgId)) throw new Eingabefehler("organisation-fehlt");
       if (db.prepare("SELECT 1 FROM nutzer WHERE email = ?").get(adresse)) throw new Eingabefehler("email-vergeben");
-      const startpasswort = erzeugeStartpasswort();
+      const eigenes = gewaehltesPasswort(b.passwort);
+      const passwort = eigenes ?? erzeugeStartpasswort();
       const { id } = db
         .prepare("INSERT INTO nutzer (email, name, passwort_hash, rolle, organisation_id, angelegt) VALUES (?, ?, ?, 'organisation', ?, ?) RETURNING id")
-        .get(adresse, name, await hashePasswort(startpasswort), orgId, jetzt()) as { id: number };
-      return reply.code(201).send({ nutzer: nutzerAnsicht(nutzer(id)!), startpasswort });
+        .get(adresse, name, await hashePasswort(passwort), orgId, jetzt()) as { id: number };
+      // Ein vom Admin gewaehltes Passwort kennt er schon; es geht nicht noch einmal durchs Netz.
+      return reply.code(201).send({ nutzer: nutzerAnsicht(nutzer(id)!), ...(eigenes ? { gesetzt: true } : { startpasswort: passwort }) });
     });
 
     bereich.patch<{ Params: { id: string }; Body: { name?: string; aktiv?: boolean; organisationId?: number } }>(
@@ -131,14 +140,16 @@ export function verwaltungRouten(app: FastifyInstance, k: Kontext) {
       },
     );
 
-    bereich.post<{ Params: { id: string } }>("/api/admin/nutzer/:id/passwort", async (req, reply) => {
+    /** Ohne Koerper ein zufaelliges Startpasswort (einmal in der Antwort), mit `passwort` genau dieses. */
+    bereich.post<{ Params: { id: string }; Body: { passwort?: string } | undefined }>("/api/admin/nutzer/:id/passwort", async (req, reply) => {
       const id = Number(req.params.id);
       if (!nutzer(id)) return reply.code(404).send({ fehler: "nicht-gefunden" });
       if (nutzerVon(req).id === id) throw new Eingabefehler("selbst-zuruecksetzen");
-      const startpasswort = erzeugeStartpasswort();
-      db.prepare("UPDATE nutzer SET passwort_hash = ? WHERE id = ?").run(await hashePasswort(startpasswort), id);
+      const eigenes = gewaehltesPasswort(req.body?.passwort);
+      const passwort = eigenes ?? erzeugeStartpasswort();
+      db.prepare("UPDATE nutzer SET passwort_hash = ? WHERE id = ?").run(await hashePasswort(passwort), id);
       sitzungenEntziehen(db, id);
-      return { startpasswort };
+      return eigenes ? { gesetzt: true } : { startpasswort: passwort };
     });
 
     bereich.delete<{ Params: { id: string } }>("/api/admin/nutzer/:id", async (req, reply) => {

@@ -235,30 +235,21 @@ export function oeffentlicheRouten(app: FastifyInstance, k: Kontext) {
     return { ...organisationAnsicht(o, sprache(req)), hatLogo: logoVorhanden(o), kennzahlen: kennzahlen(db, o.id) };
   });
 
-  /** Wie die Logo-Route unten: eigenes Logo oder eines aus den Typenschildern. */
+  /**
+   * Nur das Logo aus dem Profil. Bis 05.11.2026 sprang hier das Herstellerlogo aus dem ersten
+   * Typenschild ein; das wirkte wie automatisch gesetzt und ist auf Wunsch entfallen.
+   */
   function logoVorhanden(o: OrganisationZeile): boolean {
-    return (
-      !!o.logo_typ ||
-      !!db
-        .prepare("SELECT 1 FROM assets a JOIN endpunkte ep ON ep.id = a.endpunkt_id WHERE ep.organisation_id=? AND a.logo IS NOT NULL LIMIT 1")
-        .get(o.id)
-    );
+    return !!o.logo_typ;
   }
 
-  /** Eigenes Logo der Organisation, sonst das Herstellerlogo aus ihrem ersten Typenschild. */
   app.get<{ Params: { id: string } }>("/api/organisationen/:id/logo", async (req, reply) => {
     const id = Number(req.params.id);
     const o = db.prepare("SELECT id, oeffentlich FROM organisationen WHERE id = ?").get(id) as { id: number; oeffentlich: number } | undefined;
     if (!o || !sichtbarFuer(db, req)(o)) return reply.code(404).send({ fehler: "nicht-gefunden" });
-    const z =
-      (db.prepare("SELECT logo AS daten, logo_typ AS typ FROM organisationen WHERE id=? AND logo IS NOT NULL").get(id) as
-        | { daten: Buffer; typ: string }
-        | undefined) ??
-      (db
-        .prepare(
-          "SELECT a.logo AS daten, a.logo_typ AS typ FROM assets a JOIN endpunkte ep ON ep.id = a.endpunkt_id WHERE ep.organisation_id=? AND a.logo IS NOT NULL LIMIT 1",
-        )
-        .get(id) as { daten: Buffer; typ: string } | undefined);
+    const z = db.prepare("SELECT logo AS daten, logo_typ AS typ FROM organisationen WHERE id=? AND logo IS NOT NULL").get(id) as
+      | { daten: Buffer; typ: string }
+      | undefined;
     if (!z) return reply.code(404).send({ fehler: "nicht-gefunden" });
     // no-cache: nach einem neuen Logo im Profil soll sofort das neue erscheinen.
     return reply.header("cache-control", "no-cache").type(z.typ).send(z.daten);

@@ -8,9 +8,52 @@
 
 import { submodellAnsicht, type Element, type Knoten as AnsichtKnoten, type Wert as AnsichtWert } from "@datenportal/core";
 import { useMemo, useState } from "react";
-import { dateiUrl } from "../api.ts";
+import { api, dateiUrl, mitSprache } from "../api.ts";
 import { useT } from "../i18n/sprache.tsx";
 import { cn, Knopf, knopfKlassen } from "./basis.tsx";
+
+/**
+ * Rohes CloudEvent zum Aufklappen, im Ereignisprotokoll und im Verlauf eines Assets
+ * (dort nur im Backoffice). Geladen wird erst beim ersten Aufklappen.
+ */
+export function useRohdaten(url: string) {
+  const { sprache } = useT();
+  const [offen, setOffen] = useState(false);
+  const [roh, setRoh] = useState<unknown>(null);
+
+  async function umschalten() {
+    if (!offen && roh === null) {
+      const voll = await api<{ roh?: unknown }>(mitSprache(url, sprache));
+      setRoh(voll.roh ?? null);
+    }
+    setOffen(!offen);
+  }
+  return { offen, roh, umschalten };
+}
+
+export function RohKnopf({ offen, aufKlick }: { offen: boolean; aufKlick: () => void }) {
+  const { t } = useT();
+  return (
+    <button
+      type="button"
+      aria-expanded={offen}
+      onClick={aufKlick}
+      className={cn("shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold", offen ? "border-text bg-text text-white" : "border-linie-feld text-text-hinweis hover:text-text")}
+    >
+      {t("ereig.rohZeigen")}
+    </button>
+  );
+}
+
+export function RohAnsicht({ roh }: { roh: unknown }) {
+  const { t } = useT();
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-[11px] font-semibold tracking-[0.08em] text-text-hinweis uppercase">{t("ereig.roh")}</span>
+      <Json wert={roh} className="max-h-[28rem]" />
+    </div>
+  );
+}
 
 export function Json({ wert, className = "" }: { wert: unknown; className?: string }) {
   return (

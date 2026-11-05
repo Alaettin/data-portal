@@ -172,7 +172,7 @@ export function Assetliste({ organisationId, titel, basisPfad }: { organisationI
                     <Reihe key={`${a.endpunktId}/${a.itemId}`} className={cn("sm:hover:bg-grund", frisch.has(frischSchluessel(a)) && "neu-eingetroffen")}>
                       <Zelle>
                         <Link to={assetPfad(a, basisPfad)} className="group flex min-w-0 items-center gap-3">
-                          <Produktbild a={a} groesse={44} />
+                          <Produktbild a={a} groesse={56} />
                           <span className="flex min-w-0 flex-col">
                             <span className="truncate font-semibold group-hover:underline">{a.name ?? a.itemId}</span>
                             <span className="truncate font-mono text-xs text-text-hinweis">{a.bestellnummer ?? a.itemId}</span>
