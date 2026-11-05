@@ -187,13 +187,58 @@ export function VerwOrganisationen() {
 
 // ---------- Nutzer ----------
 
+type Rolle = NutzerZeile["rolle"];
+
+/**
+ * Rolle und Organisation zusammen: Administratoren gehoeren zu keiner Organisation (so verlangt
+ * es auch die Tabelle), deshalb erscheint die Organisationsauswahl nur bei der Rolle Organisation.
+ */
+function RolleUndOrganisation({
+  rolle,
+  organisationId,
+  orgs,
+  aendern,
+}: {
+  rolle: Rolle;
+  organisationId: string;
+  orgs: OrgZeile[] | null;
+  aendern: (teil: { rolle?: Rolle; organisationId?: string }) => void;
+}) {
+  const { t } = useT();
+  return (
+    <>
+      <Beschriftet titel={t("verw.rolle")}>
+        <Auswahl value={rolle} onChange={(e) => aendern({ rolle: e.target.value as Rolle })}>
+          <option value="organisation">{t("verw.rolleOrganisation")}</option>
+          <option value="admin">{t("verw.rolleAdmin")}</option>
+        </Auswahl>
+      </Beschriftet>
+      {rolle === "organisation" && (
+        <Beschriftet titel={t("verw.nutzerOrg")}>
+          <Auswahl value={organisationId} onChange={(e) => aendern({ organisationId: e.target.value })} required>
+            <option value="" disabled>
+              {t("verw.nutzerOrgWaehlen")}
+            </option>
+            {orgs?.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.name}
+              </option>
+            ))}
+          </Auswahl>
+        </Beschriftet>
+      )}
+    </>
+  );
+}
+
 export function VerwNutzer() {
   const { t, datumZeit } = useT();
   const { nutzer: ich } = useKonto();
   const { daten, fehler, laedt } = useDaten<NutzerZeile[]>("/api/admin/nutzer");
   const orgs = useDaten<OrgZeile[]>("/api/admin/organisationen").daten;
   const a = useAktion();
-  const [formular, setFormular] = useState<{ name: string; email: string; organisationId: string; passwort: string } | null>(null);
+  const [formular, setFormular] = useState<{ name: string; email: string; rolle: Rolle; organisationId: string; passwort: string } | null>(null);
+  const [bearb, setBearb] = useState<{ n: NutzerZeile; name: string; rolle: Rolle; organisationId: string } | null>(null);
   const [frage, setFrage] = useState<{ art: "loeschen"; n: NutzerZeile } | null>(null);
   const [pw, setPw] = useState<{ n: NutzerZeile; weg: "zufall" | "eigen"; neu: string; wieder: string } | null>(null);
   /** Nach dem Anlegen oder Aendern: das Startpasswort zum Notieren, oder ohne `passwort` nur die Bestaetigung. */
@@ -204,13 +249,34 @@ export function VerwNutzer() {
     const r = await a.ausfuehren(() =>
       api<{ nutzer: NutzerZeile; startpasswort?: string }>("/api/admin/nutzer", {
         methode: "POST",
-        koerper: { name: formular.name, email: formular.email, organisationId: Number(formular.organisationId), passwort: formular.passwort || undefined },
+        koerper: {
+          name: formular.name,
+          email: formular.email,
+          rolle: formular.rolle,
+          organisationId: formular.rolle === "organisation" ? Number(formular.organisationId) : undefined,
+          passwort: formular.passwort || undefined,
+        },
       }),
     );
     if (r) {
       setFormular(null);
       setErgebnis({ name: r.nutzer.name, email: r.nutzer.email, passwort: r.startpasswort });
     }
+  }
+
+  async function speichern() {
+    if (!bearb) return;
+    const r = await a.ausfuehren(() =>
+      api(`/api/admin/nutzer/${bearb.n.id}`, {
+        methode: "PATCH",
+        koerper: {
+          name: bearb.name,
+          rolle: bearb.rolle,
+          organisationId: bearb.rolle === "organisation" ? Number(bearb.organisationId) : undefined,
+        },
+      }),
+    );
+    if (r) setBearb(null);
   }
 
   async function loeschen() {
@@ -247,7 +313,7 @@ export function VerwNutzer() {
             title={keineOrg ? t("verw.ersteOrgZuerst") : undefined}
             onClick={() => {
               a.setFehler(null);
-              setFormular({ name: "", email: "", organisationId: "", passwort: "" });
+              setFormular({ name: "", email: "", rolle: "organisation", organisationId: "", passwort: "" });
             }}
           >
             {t("verw.nutzerNeu")}
@@ -291,6 +357,14 @@ export function VerwNutzer() {
                     <Zelle>
                       {!selbst && (
                         <Symbolreihe>
+                          <Symbolknopf
+                            symbol="bearbeiten"
+                            beschriftung={t("verw.nutzerBearbeiten")}
+                            onClick={() => {
+                              a.setFehler(null);
+                              setBearb({ n, name: n.name, rolle: n.rolle, organisationId: n.organisationId === null ? "" : String(n.organisationId) });
+                            }}
+                          />
                           <Symbolknopf
                             symbol={n.aktiv ? "sperren" : "entsperren"}
                             beschriftung={n.aktiv ? t("verw.sperren") : t("verw.entsperren")}
@@ -338,18 +412,12 @@ export function VerwNutzer() {
           <>
             <Eingabe titel={t("verw.nutzerName")} value={formular.name} onChange={(e) => setFormular({ ...formular, name: e.target.value })} autoFocus required />
             <Eingabe titel={t("verw.nutzerEmail")} type="email" value={formular.email} onChange={(e) => setFormular({ ...formular, email: e.target.value })} required />
-            <Beschriftet titel={t("verw.nutzerOrg")}>
-              <Auswahl value={formular.organisationId} onChange={(e) => setFormular({ ...formular, organisationId: e.target.value })} required>
-                <option value="" disabled>
-                  {t("verw.nutzerOrgWaehlen")}
-                </option>
-                {orgs?.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.name}
-                  </option>
-                ))}
-              </Auswahl>
-            </Beschriftet>
+            <RolleUndOrganisation
+              rolle={formular.rolle}
+              organisationId={formular.organisationId}
+              orgs={orgs}
+              aendern={(teil) => setFormular({ ...formular, ...teil })}
+            />
             <Eingabe
               titel={t("verw.pwOptional")}
               hinweis={t("verw.pwOptionalHinweis")}
@@ -359,6 +427,24 @@ export function VerwNutzer() {
               value={formular.passwort}
               onChange={(e) => setFormular({ ...formular, passwort: e.target.value })}
             />
+          </>
+        )}
+      </Formularfenster>
+
+      <Formularfenster
+        offen={bearb !== null}
+        aufOffen={(o) => !o && setBearb(null)}
+        titel={t("verw.nutzerBearbeiten")}
+        absendenText={t("allg.speichern")}
+        laeuft={a.laeuft}
+        fehler={a.fehler}
+        aufAbsenden={() => void speichern()}
+      >
+        {bearb && (
+          <>
+            <Eingabe titel={t("verw.nutzerName")} value={bearb.name} onChange={(e) => setBearb({ ...bearb, name: e.target.value })} required />
+            <RolleUndOrganisation rolle={bearb.rolle} organisationId={bearb.organisationId} orgs={orgs} aendern={(teil) => setBearb({ ...bearb, ...teil })} />
+            {bearb.rolle !== bearb.n.rolle && <p className="text-sm text-text-hinweis">{t("verw.rolleHinweis", { name: bearb.n.name })}</p>}
           </>
         )}
       </Formularfenster>

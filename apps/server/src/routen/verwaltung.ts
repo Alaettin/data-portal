@@ -31,6 +31,13 @@ const NUTZER_SQL = `
 
 const nutzerAnsicht = (n: NutzerZeile) => ({ ...n, aktiv: n.aktiv === 1 });
 
+/** `admin` oder `organisation`; fehlend heisst unveraendert (null), alles andere ist ein Fehler. */
+function rolleVon(wert: unknown): "admin" | "organisation" | null {
+  if (wert === undefined || wert === null || wert === "") return null;
+  if (wert === "admin" || wert === "organisation") return wert;
+  throw new Eingabefehler("rolle-ungueltig");
+}
+
 /** Vom Admin gewaehltes Passwort: leer oder fehlend heisst "erzeugen", sonst mindestens 12 Zeichen. */
 function gewaehltesPasswort(wert: unknown): string | null {
   if (wert === undefined || wert === null || wert === "") return null;
@@ -99,23 +106,25 @@ export function verwaltungRouten(app: FastifyInstance, k: Kontext) {
       (db.prepare(`${NUTZER_SQL} ORDER BY n.rolle, o.name COLLATE NOCASE, n.name COLLATE NOCASE`).all() as NutzerZeile[]).map(nutzerAnsicht),
     );
 
-    bereich.post<{ Body: { email?: string; name?: string; organisationId?: number; passwort?: string } }>("/api/admin/nutzer", async (req, reply) => {
+    bereich.post<{ Body: { email?: string; name?: string; organisationId?: number; passwort?: string; rolle?: string } }>("/api/admin/nutzer", async (req, reply) => {
       const b = req.body ?? {};
       const adresse = email(b.email);
       const name = pflichttext(b.name, "name-fehlt");
-      const orgId = Number(b.organisationId);
-      if (!organisation(orgId)) throw new Eingabefehler("organisation-fehlt");
+      const rolle = rolleVon(b.rolle) ?? "organisation";
+      // Admins gehoeren zu keiner Organisation (CHECK in der Tabelle nutzer).
+      const orgId = rolle === "admin" ? null : Number(b.organisationId);
+      if (orgId !== null && !organisation(orgId)) throw new Eingabefehler("organisation-fehlt");
       if (db.prepare("SELECT 1 FROM nutzer WHERE email = ?").get(adresse)) throw new Eingabefehler("email-vergeben");
       const eigenes = gewaehltesPasswort(b.passwort);
       const passwort = eigenes ?? erzeugeStartpasswort();
       const { id } = db
-        .prepare("INSERT INTO nutzer (email, name, passwort_hash, rolle, organisation_id, angelegt) VALUES (?, ?, ?, 'organisation', ?, ?) RETURNING id")
-        .get(adresse, name, await hashePasswort(passwort), orgId, jetzt()) as { id: number };
+        .prepare("INSERT INTO nutzer (email, name, passwort_hash, rolle, organisation_id, angelegt) VALUES (?, ?, ?, ?, ?, ?) RETURNING id")
+        .get(adresse, name, await hashePasswort(passwort), rolle, orgId, jetzt()) as { id: number };
       // Ein vom Admin gewaehltes Passwort kennt er schon; es geht nicht noch einmal durchs Netz.
       return reply.code(201).send({ nutzer: nutzerAnsicht(nutzer(id)!), ...(eigenes ? { gesetzt: true } : { startpasswort: passwort }) });
     });
 
-    bereich.patch<{ Params: { id: string }; Body: { name?: string; aktiv?: boolean; organisationId?: number } }>(
+    bereich.patch<{ Params: { id: string }; Body: { name?: string; aktiv?: boolean; organisationId?: number; rolle?: string } }>(
       "/api/admin/nutzer/:id",
       async (req, reply) => {
         const id = Number(req.params.id);
@@ -124,17 +133,23 @@ export function verwaltungRouten(app: FastifyInstance, k: Kontext) {
         const b = req.body ?? {};
         const selbst = nutzerVon(req).id === id;
         if (selbst && b.aktiv === false) throw new Eingabefehler("selbst-sperren");
-        let orgId = n.organisationId;
-        if (b.organisationId !== undefined && n.rolle === "organisation") {
-          if (!organisation(Number(b.organisationId))) throw new Eingabefehler("organisation-fehlt");
-          orgId = Number(b.organisationId);
+        const rolle = rolleVon(b.rolle) ?? (n.rolle as "admin" | "organisation");
+        // Wer handelt, ist Admin und kann sich nicht herabstufen: so bleibt immer ein Admin uebrig.
+        if (selbst && rolle !== n.rolle) throw new Eingabefehler("selbst-rolle");
+        let orgId: number | null = null;
+        if (rolle === "organisation") {
+          orgId = b.organisationId !== undefined ? Number(b.organisationId) : n.organisationId;
+          if (orgId === null || !organisation(orgId)) throw new Eingabefehler("organisation-fehlt");
         }
-        db.prepare("UPDATE nutzer SET name = ?, aktiv = ?, organisation_id = ? WHERE id = ?").run(
+        db.prepare("UPDATE nutzer SET name = ?, aktiv = ?, rolle = ?, organisation_id = ? WHERE id = ?").run(
           b.name === undefined ? n.name : pflichttext(b.name, "name-fehlt"),
           b.aktiv === undefined ? n.aktiv : b.aktiv ? 1 : 0,
+          rolle,
           orgId,
           id,
         );
+        // Neue Rechte gelten sofort. Ein Rollenwechsel aendert immer auch die Organisation (Admin
+        // heisst NULL), deshalb deckt der Vergleich der Organisation ihn mit ab.
         if (b.aktiv === false || orgId !== n.organisationId) sitzungenEntziehen(db, id);
         return nutzerAnsicht(nutzer(id)!);
       },

@@ -55,6 +55,58 @@ describe("Passwort durch den Admin", () => {
   });
 });
 
+describe("Weitere Administratoren", () => {
+  it("legt Admins ohne Organisation an und stuft Nutzer hoch und zurueck", async () => {
+    t = await baue();
+    const admin = await anmelden(t.app, ADMIN.email, ADMIN.passwort);
+    const a = await organisationMitNutzer(t.app, admin, "Alpha", "a@example.invalid");
+    const b = await organisationMitNutzer(t.app, admin, "Beta", "b@example.invalid");
+    const darfVerwaltung = async (cookie: string) => (await t!.app.inject({ url: "/api/admin/nutzer", headers: { cookie } })).statusCode;
+    const backoffice = async (cookie: string, org: number) => (await t!.app.inject({ url: `/api/backoffice/${org}`, headers: { cookie } })).statusCode;
+    const patch = (id: number, payload: object, cookie = admin) =>
+      t!.app.inject({ method: "PATCH", url: `/api/admin/nutzer/${id}`, headers: { cookie }, payload });
+
+    // Neuer Admin: keine Organisation, sieht Verwaltung und jedes Backoffice.
+    const neu = await t.app.inject({
+      method: "POST",
+      url: "/api/admin/nutzer",
+      headers: { cookie: admin },
+      payload: { email: "zweiter@example.invalid", name: "Zweiter Admin", rolle: "admin", passwort: "zweiter-admin-2026" },
+    });
+    expect(neu.statusCode).toBe(201);
+    expect(neu.json()).toMatchObject({ nutzer: { rolle: "admin", organisationId: null } });
+    const zweiter = await anmelden(t.app, "zweiter@example.invalid", "zweiter-admin-2026");
+    expect(await darfVerwaltung(zweiter)).toBe(200);
+    expect(await backoffice(zweiter, a.orgId)).toBe(200);
+    expect(await backoffice(zweiter, b.orgId)).toBe(200);
+
+    // Organisationsnutzer hochstufen: Organisation weg, alte Sitzung ungueltig, neue mit Admin-Rechten.
+    expect(await darfVerwaltung(a.cookie)).toBe(404);
+    const hoch = await patch(a.nutzerId, { rolle: "admin" });
+    expect(hoch.json()).toMatchObject({ rolle: "admin", organisationId: null });
+    expect((await t.app.inject({ url: "/api/auth/ich", headers: { cookie: a.cookie } })).json()).toMatchObject({ nutzer: null });
+    const aAdmin = await anmelden(t.app, "a@example.invalid", a.startpasswort);
+    expect(await darfVerwaltung(aAdmin)).toBe(200);
+
+    // Zurueckstufen braucht eine Organisation; danach nur noch deren Backoffice.
+    const ohne = await patch(a.nutzerId, { rolle: "organisation" });
+    expect(ohne.statusCode).toBe(400);
+    expect(ohne.json()).toEqual({ fehler: "organisation-fehlt" });
+    expect((await patch(a.nutzerId, { rolle: "organisation", organisationId: b.orgId })).json()).toMatchObject({ rolle: "organisation", organisationId: b.orgId });
+    const aOrg = await anmelden(t.app, "a@example.invalid", a.startpasswort);
+    expect(await darfVerwaltung(aOrg)).toBe(404);
+    expect(await backoffice(aOrg, b.orgId)).toBe(200);
+    expect(await backoffice(aOrg, a.orgId)).toBe(404);
+
+    // Die eigene Rolle aendert niemand, auch nicht der zweite Admin.
+    const zweiterId = (neu.json() as { nutzer: { id: number } }).nutzer.id;
+    const selbst = await patch(zweiterId, { rolle: "organisation", organisationId: a.orgId }, zweiter);
+    expect(selbst.statusCode).toBe(400);
+    expect(selbst.json()).toEqual({ fehler: "selbst-rolle" });
+    expect((await patch(zweiterId, { rolle: "chef" })).json()).toEqual({ fehler: "rolle-ungueltig" });
+  });
+});
+
 describe("Organisationslogo", () => {
   it("kommt nur aus dem Profil, nie aus dem Typenschild eines Assets", async () => {
     t = await baue();
