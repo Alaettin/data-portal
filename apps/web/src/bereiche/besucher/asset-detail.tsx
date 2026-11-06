@@ -439,14 +439,16 @@ function Teilmodelle({ a, backoffice }: { a: Detail; backoffice?: Backoffice }) 
               ))}
             </Auswahl>
           )}
-          {/* Neu einsetzen je Teilmodell, damit eine alte Meldung nicht beim naechsten stehen bleibt. */}
-          <TeilmodellKopf key={aktiv.id} a={a} name={aktiv.name} smId={aktiv.id} backoffice={backoffice} />
+          {/* Neu einsetzen je Teilmodell, damit eine alte Meldung nicht beim naechsten stehen bleibt.
+              Der Schluessel muss sich von dem des Inhalts darunter unterscheiden: zwei Geschwister mit
+              gleichem key liessen bei jedem Wechsel einen Kopf stehen (06.11.2026, 10 Koepfe nach 5 Runden). */}
+          <TeilmodellKopf key={`kopf:${aktiv.id}`} a={a} name={aktiv.name} smId={aktiv.id} backoffice={backoffice} />
           {!elemente ? (
             <p className="text-sm text-text-hinweis">{t("teilmodell.nichtGeladen")}</p>
           ) : elemente.length === 0 ? (
             <p className="text-sm text-text-hinweis">{t("teilmodell.leer")}</p>
           ) : (
-            <Teilmodell key={aktiv.id} elemente={elemente} herkunft={{ asset: a, submodelId: aktiv.id }} />
+            <Teilmodell key={`inhalt:${aktiv.id}`} elemente={elemente} herkunft={{ asset: a, submodelId: aktiv.id }} />
           )}
         </div>
       </div>
