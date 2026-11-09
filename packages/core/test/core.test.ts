@@ -124,6 +124,11 @@ describe("Submodell-Namen", () => {
     expect(submodelAnzeigename(null, "AssetInterfacesDescription", "en")).toBe("Asset interfaces description");
     expect(submodelAnzeigename(null, "SoftwareNameplate", "de")).toBe("Software-Typenschild");
     expect(submodelAnzeigename(null, "Nameplate", "de")).toBe("Typenschild");
+    // ZVEI-Kontaktinformationen liegen im Nameplate-Namensraum (Lenze, 09.11.2026).
+    const kontakt = "https://admin-shell.io/zvei/nameplate/1/0/ContactInformations";
+    expect(submodelAnzeigename(kontakt, "ContactInformations", "de")).toBe("Kontakt");
+    expect(submodelAnzeigename(kontakt, "ContactInformations", "en")).toBe("Contact");
+    expect(submodelAnzeigename("https://admin-shell.io/idta/nameplate/3/0/Nameplate", "Nameplate", "de")).toBe("Typenschild");
     expect(submodelAnzeigename(null, "Unbekannt", "de")).toBe("Unbekannt");
   });
 

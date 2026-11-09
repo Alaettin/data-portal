@@ -100,15 +100,16 @@ export function vergleichen(vorher: Submodel | null, nachher: Submodel): Aenderu
 
 /** Bekannte Submodelle mit Anzeigenamen je Sprache, erkannt an der semanticId. */
 const BEKANNT: { muster: RegExp; name: Record<Sprache, string> }[] = [
-  // Vor "nameplate", sonst traefe das allgemeinere Muster zuerst.
+  // Vor "nameplate", sonst traefe das allgemeinere Muster zuerst. Die Kontaktinformationen
+  // liegen im Nameplate-Namensraum (https://admin-shell.io/zvei/nameplate/1/0/ContactInformations).
   { muster: /SoftwareNameplate/i, name: { de: "Software-Typenschild", en: "Software nameplate" } },
+  { muster: /ContactInformation/i, name: { de: "Kontakt", en: "Contact" } },
   { muster: /nameplate/i, name: { de: "Typenschild", en: "Nameplate" } },
   { muster: /0173-1#01-AHE582/, name: { de: "Änderungsmitteilungen", en: "Change notifications" } },
   { muster: /ProductChangeNotifications/i, name: { de: "Änderungsmitteilungen", en: "Change notifications" } },
   { muster: /TechnicalData/i, name: { de: "Technische Daten", en: "Technical data" } },
   { muster: /HandoverDocumentation|Documentation/i, name: { de: "Dokumentation", en: "Documentation" } },
   { muster: /CarbonFootprint/i, name: { de: "CO₂-Fußabdruck", en: "Carbon footprint" } },
-  { muster: /ContactInformation/i, name: { de: "Kontakt", en: "Contact" } },
   { muster: /AssetInterfaces?Description/i, name: { de: "Schnittstellenbeschreibung", en: "Asset interfaces description" } },
   { muster: /HierarchicalStructures|BillOfMaterial/i, name: { de: "Stückliste", en: "Bill of material" } },
 ];
