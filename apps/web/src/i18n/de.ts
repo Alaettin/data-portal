@@ -84,6 +84,7 @@ export const de = {
   "spalte.status": "Status",
   "spalte.oeffentlich": "Öffentlich",
   "liste.ausgeblendet": "Ausgeblendet",
+  "liste.ausgeblendeteZeigen": "Ausgeblendete zeigen",
   "liste.zeigen": "{name} öffentlich zeigen",
 
   "blaettern.zeige": "Zeige {von} bis {bis} von {gesamt}",

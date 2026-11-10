@@ -73,7 +73,10 @@ export function Assetliste({
   if (q) abfrage.set("q", q);
   if (organisation) abfrage.set("organisation", organisation);
   if (status) abfrage.set("status", status);
-  if (backoffice) abfrage.set("alle", "1");
+  // Im Backoffice ab Werk mit den ausgeblendeten Assets; `ausgeblendete=aus` zeigt nur, was auch
+  // Besucher sehen (ohne `alle=1` filtert der Server selbst).
+  const ausgeblendeteZeigen = !!backoffice && p.get("ausgeblendete") !== "aus";
+  if (ausgeblendeteZeigen) abfrage.set("alle", "1");
   const { daten, fehler, letzte } = useDaten<AssetListe>(`/api/assets?${abfrage.toString()}`);
   const liste = daten ?? letzte;
 
@@ -93,7 +96,7 @@ export function Assetliste({
     else setze({ sort: s, richtung: STANDARDRICHTUNG[s] });
   }
 
-  const gefiltert = !!(q || (organisationId === undefined && organisation) || status);
+  const gefiltert = !!(q || (organisationId === undefined && organisation) || status || (backoffice && !ausgeblendeteZeigen));
 
   const Sortierkopf = ({ s, text, className }: { s: Sorte; text: Schluessel; className?: string }) => (
     <Kopfzelle className={className}>
@@ -158,6 +161,13 @@ export function Assetliste({
               </option>
             ))}
           </Auswahl>
+          {backoffice && (
+            <Schalter
+              an={ausgeblendeteZeigen}
+              text={t("liste.ausgeblendeteZeigen")}
+              aufWechsel={(an) => setze({ ausgeblendete: an ? null : "aus" })}
+            />
+          )}
           <span className="flex items-center gap-2 lg:ml-auto">
             <Auswahl aria-label={t("sort.label")} value={sort} onChange={(e) => sortiereNach(e.target.value as Sorte)} className="w-auto">
               {SORTEN.map((s) => (
@@ -177,7 +187,7 @@ export function Assetliste({
             className="self-start text-sm font-semibold text-primaer-dunkel hover:underline"
             onClick={() => {
               setSuche("");
-              setze({ q: null, organisation: null, status: null });
+              setze({ q: null, organisation: null, status: null, ausgeblendete: null });
             }}
           >
             {t("filter.zuruecksetzen")}
