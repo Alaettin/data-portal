@@ -86,6 +86,8 @@ export type AssetKurz = {
   organisationSlug: string;
   organisationFarbe: string;
   organisationOeffentlich: boolean;
+  /** Von der Organisation aus der oeffentlichen Ansicht ausgeblendet; nur das Backoffice sieht es. */
+  verborgen: boolean;
   anzahlUpdates: number;
   anzahlPcns: number;
   abgekuendigt: boolean;

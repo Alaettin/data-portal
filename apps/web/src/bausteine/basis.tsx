@@ -248,12 +248,27 @@ export function Segmente<T extends string>({
 }
 
 /** Ein- und Ausschalter, ganze Zeile klickbar. */
-export function Schalter({ an, aufWechsel, text, disabled }: { an: boolean; aufWechsel: (an: boolean) => void; text: string; disabled?: boolean }) {
+export function Schalter({
+  an,
+  aufWechsel,
+  text,
+  disabled,
+  beschriftung,
+}: {
+  an: boolean;
+  aufWechsel: (an: boolean) => void;
+  text: string;
+  disabled?: boolean;
+  /** Fuer Screenreader, wenn `text` leer bleibt (etwa in einer Tabellenzeile). */
+  beschriftung?: string;
+}) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={an}
+      aria-label={beschriftung}
+      title={beschriftung}
       disabled={disabled}
       onClick={() => aufWechsel(!an)}
       className="flex items-center gap-3 text-[15px] font-medium disabled:opacity-45"

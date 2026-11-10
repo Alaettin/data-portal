@@ -6,8 +6,8 @@
 
 import { useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router";
-import { assetPfad, type AssetListe } from "../../api.ts";
-import { Abschnitt, Auswahl, cn, Feld, Knopf, Kopfzelle, Reihe, Zelle, Zustand } from "../../bausteine/basis.tsx";
+import { api, assetPfad, fehlertext, type AssetKurz, type AssetListe } from "../../api.ts";
+import { Abschnitt, Auswahl, cn, Fehlerhinweis, Feld, Knopf, Kopfzelle, Markierung, Reihe, Schalter, Zelle, Zustand } from "../../bausteine/basis.tsx";
 import { Blaetterleiste } from "../../bausteine/blaettern.tsx";
 import { AssetStatus, OrgLink, Produktbild } from "../../bausteine/fach.tsx";
 import type { Schluessel } from "../../i18n/de.ts";
@@ -23,10 +23,42 @@ const JE_SEITE = 25;
 /** Text- und Namenssortierung beginnt sinnvollerweise bei A, Datumssortierung beim Neuesten. */
 const STANDARDRICHTUNG: Record<Sorte, "auf" | "ab"> = { aktualisiert: "ab", registriert: "ab", name: "auf", hersteller: "auf", organisation: "auf" };
 
-export function Assetliste({ organisationId, titel, basisPfad }: { organisationId?: number; titel?: string; basisPfad?: string }) {
-  const { t, zahl, datum, vorWann } = useT();
-  const { frisch } = useStrom();
+/**
+ * `backoffice` (nur auf der Organisationsseite im Backoffice): ausgeblendete Assets erscheinen
+ * mit, und je Zeile schaltet ein Schalter die oeffentliche Sichtbarkeit um.
+ */
+export function Assetliste({
+  organisationId,
+  titel,
+  basisPfad,
+  backoffice,
+}: {
+  organisationId?: number;
+  titel?: string;
+  basisPfad?: string;
+  backoffice?: { orgId: number };
+}) {
+  const u = useT();
+  const { t, zahl, datum, vorWann } = u;
+  const { frisch, auffrischen } = useStrom();
   const [p, setP] = useSearchParams();
+  const [schaltet, setSchaltet] = useState<string | null>(null);
+  const [schaltFehler, setSchaltFehler] = useState<string | null>(null);
+
+  async function sichtbarkeit(a: AssetKurz, oeffentlich: boolean) {
+    if (!backoffice) return;
+    const schluessel = `${a.endpunktId}/${a.itemId}`;
+    setSchaltet(schluessel);
+    setSchaltFehler(null);
+    try {
+      await api(`/api/backoffice/${backoffice.orgId}/assets/${a.endpunktId}/${encodeURIComponent(a.itemId)}`, { methode: "PATCH", koerper: { oeffentlich } });
+      auffrischen();
+    } catch (f) {
+      setSchaltFehler(fehlertext(f, u));
+    } finally {
+      setSchaltet(null);
+    }
+  }
 
   const q = p.get("q") ?? "";
   const organisation = organisationId !== undefined ? String(organisationId) : (p.get("organisation") ?? "");
@@ -41,6 +73,7 @@ export function Assetliste({ organisationId, titel, basisPfad }: { organisationI
   if (q) abfrage.set("q", q);
   if (organisation) abfrage.set("organisation", organisation);
   if (status) abfrage.set("status", status);
+  if (backoffice) abfrage.set("alle", "1");
   const { daten, fehler, letzte } = useDaten<AssetListe>(`/api/assets?${abfrage.toString()}`);
   const liste = daten ?? letzte;
 
@@ -155,6 +188,11 @@ export function Assetliste({ organisationId, titel, basisPfad }: { organisationI
       <Zustand laedt={!liste} fehler={fehler} leer={liste?.gesamt === 0} leerText={gefiltert ? t("liste.leer") : t("liste.leerGanz")}>
         {liste && (
           <div className="flex flex-col gap-4 pb-5">
+            {schaltFehler && (
+              <div className="px-5 pt-4 sm:px-6">
+                <Fehlerhinweis>{schaltFehler}</Fehlerhinweis>
+              </div>
+            )}
             <div className="sm:overflow-x-auto">
               <table className="w-full border-collapse text-[15px] sm:min-w-[860px]">
                 <thead className="max-sm:hidden">
@@ -165,13 +203,14 @@ export function Assetliste({ organisationId, titel, basisPfad }: { organisationI
                     <Sortierkopf s="registriert" text="spalte.registriert" className="sm:w-32" />
                     <Sortierkopf s="aktualisiert" text="spalte.aktualisiert" className="sm:w-36" />
                     <Kopfzelle className="sm:w-48">{t("spalte.status")}</Kopfzelle>
+                    {backoffice && <Kopfzelle className="sm:w-28">{t("spalte.oeffentlich")}</Kopfzelle>}
                   </tr>
                 </thead>
                 <tbody>
                   {liste.eintraege.map((a) => (
                     <Reihe key={`${a.endpunktId}/${a.itemId}`} className={cn("sm:hover:bg-grund", frisch.has(frischSchluessel(a)) && "neu-eingetroffen")}>
                       <Zelle>
-                        <Link to={assetPfad(a, basisPfad)} className="group flex min-w-0 items-center gap-3">
+                        <Link to={assetPfad(a, basisPfad)} className={cn("group flex min-w-0 items-center gap-3", a.verborgen && "opacity-55")}>
                           <Produktbild a={a} groesse={56} />
                           <span className="flex min-w-0 flex-col">
                             <span className="truncate font-semibold group-hover:underline">{a.name ?? a.itemId}</span>
@@ -194,8 +233,22 @@ export function Assetliste({ organisationId, titel, basisPfad }: { organisationI
                         {a.aktualisiert ? <time dateTime={a.aktualisiert}>{vorWann(a.aktualisiert)}</time> : "·"}
                       </Zelle>
                       <Zelle titel={t("spalte.status")}>
-                        <AssetStatus a={a} />
+                        <span className="flex flex-wrap items-center gap-1.5">
+                          {backoffice && a.verborgen && <Markierung text={t("liste.ausgeblendet")} farbe="var(--color-text-hinweis)" />}
+                          <AssetStatus a={a} />
+                        </span>
                       </Zelle>
+                      {backoffice && (
+                        <Zelle titel={t("spalte.oeffentlich")}>
+                          <Schalter
+                            an={!a.verborgen}
+                            text=""
+                            beschriftung={t("liste.zeigen", { name: a.name ?? a.itemId })}
+                            disabled={schaltet !== null}
+                            aufWechsel={(an) => void sichtbarkeit(a, an)}
+                          />
+                        </Zelle>
+                      )}
                     </Reihe>
                   ))}
                 </tbody>

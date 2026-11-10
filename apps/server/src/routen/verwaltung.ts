@@ -9,6 +9,7 @@ import { erzeugeStartpasswort, hashePasswort, MIN_PASSWORTLAENGE } from "../auth
 import { sitzungenEntziehen } from "../auth/sitzung.ts";
 import { angemeldet, nurAdmin, nutzerVon } from "../auth/waechter.ts";
 import { jetzt } from "../db.ts";
+import { assetsLoeschen, rueckstandLeeren } from "../loeschen.ts";
 import { Eingabefehler, email, pflichttext, slugVon } from "./hilfen.ts";
 import type { Kontext } from "./kontext.ts";
 
@@ -69,7 +70,7 @@ export function verwaltungRouten(app: FastifyInstance, k: Kontext) {
         angelegt: o.angelegt,
         nutzer: (db.prepare("SELECT COUNT(*) AS n FROM nutzer WHERE organisation_id = ?").get(o.id) as { n: number }).n,
         endpunkte: (db.prepare("SELECT COUNT(*) AS n FROM endpunkte WHERE organisation_id = ?").get(o.id) as { n: number }).n,
-        assets: kennzahlen(db, o.id).assets,
+        assets: kennzahlen(db, o.id, { mitVerborgenen: true }).assets,
       }));
     });
 
@@ -98,8 +99,36 @@ export function verwaltungRouten(app: FastifyInstance, k: Kontext) {
       for (const e of ids) k.takt.entfernen(e.id);
       // Endpunkte, Bestand und Nutzer haengen per ON DELETE CASCADE daran.
       db.prepare("DELETE FROM organisationen WHERE id = ?").run(id);
+      rueckstandLeeren(db);
       k.strom.senden({ typ: "bestand" });
       return { ok: true };
+    });
+
+    /**
+     * Alle Assets der Organisation loeschen, ueber alle Endpunkte. Endpunkte und ihre
+     * Lese-Position im Feed bleiben: alte Events holen nichts zurueck, ein neues Event des
+     * Herstellers legt das Asset wieder an (Nutzerentscheidung 10.11.2026).
+     */
+    bereich.delete<{ Params: { id: string } }>("/api/admin/organisationen/:id/assets", async (req, reply) => {
+      const id = Number(req.params.id);
+      if (!organisation(id)) return reply.code(404).send({ fehler: "nicht-gefunden" });
+      const ids = (db.prepare("SELECT id FROM endpunkte WHERE organisation_id = ?").all(id) as { id: number }[]).map((e) => e.id);
+      const geloescht = assetsLoeschen(db, ids);
+      rueckstandLeeren(db);
+      k.strom.senden({ typ: "bestand" });
+      return { geloescht };
+    });
+
+    /** Ein Asset mit allem, was daran haengt. Nur Admins; frueher durfte das jedes Mitglied. */
+    bereich.delete<{ Params: { eid: string; item: string } }>("/api/admin/assets/:eid/:item", async (req, reply) => {
+      const eid = Number(req.params.eid);
+      if (!db.prepare("SELECT 1 FROM assets WHERE endpunkt_id = ? AND item_id = ?").get(eid, req.params.item)) {
+        return reply.code(404).send({ fehler: "nicht-gefunden" });
+      }
+      assetsLoeschen(db, [eid], req.params.item);
+      rueckstandLeeren(db);
+      k.strom.senden({ typ: "bestand" });
+      return { geloescht: 1 };
     });
 
     bereich.get("/api/admin/nutzer", async () =>

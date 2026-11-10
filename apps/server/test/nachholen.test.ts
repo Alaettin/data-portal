@@ -238,7 +238,7 @@ describe("Datenbank-Fassung 4", () => {
       v3.close();
 
       const db = oeffnen(datei);
-      expect(db.pragma("user_version", { simple: true })).toBe(4);
+      expect(db.pragma("user_version", { simple: true })).toBe(5);
       expect((db.prepare("SELECT oeffentlich FROM organisationen WHERE slug='pf'").get() as { oeffentlich: number }).oeffentlich).toBe(1);
       expect((db.prepare("SELECT COUNT(*) AS n FROM assets").get() as { n: number }).n).toBe(1);
       // Neu angelegte Organisationen sind privat.
@@ -249,6 +249,35 @@ describe("Datenbank-Fassung 4", () => {
       const wieder = oeffnen(datei);
       expect((wieder.prepare("SELECT oeffentlich FROM organisationen WHERE slug='neu'").get() as { oeffentlich: number }).oeffentlich).toBe(0);
       wieder.close();
+    } finally {
+      rmSync(ordner, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("Datenbank-Fassung 5", () => {
+  it("behaelt den Bestand einer Fassung-4-DB und legt die leere Tabelle verborgen an", () => {
+    const ordner = mkdtempSync(join(tmpdir(), "adp-"));
+    try {
+      const datei = join(ordner, "portal.db");
+      // Eine Fassung-4-DB mit Daten, wie sie am 10.11.2026 auf Sliplane lag.
+      const v4 = oeffnen(datei);
+      v4.exec("DROP TABLE verborgen");
+      v4.pragma("user_version = 4");
+      v4.prepare("INSERT INTO organisationen (slug, name, oeffentlich, angelegt) VALUES ('pf', 'P+F', 1, 'x')").run();
+      v4.prepare("INSERT INTO endpunkte (organisation_id, name, feed_url, angelegt) VALUES (1, 'E', 'https://x', 'x')").run();
+      v4.prepare("INSERT INTO assets (endpunkt_id, item_id) VALUES (1, '181363')").run();
+      v4.prepare("INSERT INTO submodelle (endpunkt_id, submodel_id, item_id, stand) VALUES (1, 'sm', '181363', 'z')").run();
+      v4.close();
+
+      const db = oeffnen(datei);
+      expect(db.pragma("user_version", { simple: true })).toBe(5);
+      expect((db.prepare("SELECT COUNT(*) AS n FROM assets").get() as { n: number }).n).toBe(1);
+      expect((db.prepare("SELECT COUNT(*) AS n FROM submodelle").get() as { n: number }).n).toBe(1);
+      expect((db.prepare("SELECT COUNT(*) AS n FROM verborgen").get() as { n: number }).n).toBe(0);
+      expect((db.prepare("SELECT oeffentlich FROM organisationen").get() as { oeffentlich: number }).oeffentlich).toBe(1);
+      expect(db.pragma("secure_delete", { simple: true })).toBe(1);
+      db.close();
     } finally {
       rmSync(ordner, { recursive: true, force: true });
     }
@@ -271,7 +300,7 @@ describe("Datenbank-Fassungen", () => {
       v2.close();
 
       const db = oeffnen(datei);
-      expect(db.pragma("user_version", { simple: true })).toBe(4);
+      expect(db.pragma("user_version", { simple: true })).toBe(5);
       expect((db.prepare("SELECT COUNT(*) AS n FROM assets").get() as { n: number }).n).toBe(1);
       expect((db.prepare("SELECT COUNT(*) AS n FROM events").get() as { n: number }).n).toBe(1);
       const spalten = (db.prepare("PRAGMA table_info(assets)").all() as { name: string }[]).map((s) => s.name);

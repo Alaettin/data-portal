@@ -53,6 +53,7 @@ export function VerwOrganisationen() {
   const a = useAktion();
   const [formular, setFormular] = useState<{ id: number | null; name: string } | null>(null);
   const [loeschen, setLoeschen] = useState<OrgZeile | null>(null);
+  const [leeren, setLeeren] = useState<OrgZeile | null>(null);
 
   async function speichern() {
     if (!formular) return;
@@ -90,7 +91,7 @@ export function VerwOrganisationen() {
                 <Kopfzelle className="sm:w-28">{t("verw.spalteEndpunkte")}</Kopfzelle>
                 <Kopfzelle className="sm:w-24">{t("verw.spalteAssets")}</Kopfzelle>
                 <Kopfzelle className="sm:w-32">{t("verw.spalteAngelegt")}</Kopfzelle>
-                <Kopfzelle className="sm:w-40" />
+                <Kopfzelle className="sm:w-48" />
               </tr>
             </thead>
             <tbody>
@@ -126,6 +127,16 @@ export function VerwOrganisationen() {
                         onClick={() => {
                           a.setFehler(null);
                           setFormular({ id: o.id, name: o.name });
+                        }}
+                      />
+                      <Symbolknopf
+                        symbol="leeren"
+                        gefahr
+                        disabled={o.assets === 0}
+                        beschriftung={t("verw.assetsLoeschen")}
+                        onClick={() => {
+                          a.setFehler(null);
+                          setLeeren(o);
                         }}
                       />
                       <Symbolknopf
@@ -180,6 +191,21 @@ export function VerwOrganisationen() {
         }
       >
         <p>{loeschen && t("verw.orgLoeschenFrage", { name: loeschen.name })}</p>
+      </Rueckfrage>
+
+      <Rueckfrage
+        offen={leeren !== null}
+        aufOffen={(o) => !o && setLeeren(null)}
+        titel={t("verw.assetsLoeschen")}
+        bestaetigenText={t("verw.assetsLoeschen")}
+        art="gefahr"
+        laeuft={a.laeuft}
+        fehler={a.fehler}
+        aufBestaetigen={() =>
+          void a.ausfuehren(() => api(`/api/admin/organisationen/${leeren!.id}/assets`, { methode: "DELETE" })).then((r) => r && setLeeren(null))
+        }
+      >
+        <p>{leeren && t("verw.assetsLoeschenFrage", { n: zahl(leeren.assets), name: leeren.name })}</p>
       </Rueckfrage>
     </>
   );

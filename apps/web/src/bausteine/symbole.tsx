@@ -22,6 +22,14 @@ const PFADE = {
       <path d="M14 11v6" />
     </>
   ),
+  /** Inhalt leeren, die Huelle bleibt: Kiste mit Strich (alle Assets loeschen). */
+  leeren: (
+    <>
+      <path d="M21 8v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8" />
+      <path d="M1 3h22v5H1z" />
+      <path d="M9 13h6" />
+    </>
+  ),
   passwort: (
     <>
       <circle cx="7.5" cy="15.5" r="5.5" />

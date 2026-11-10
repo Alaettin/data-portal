@@ -24,8 +24,8 @@ export const feedAttrappe: typeof fetch = async (eingabe) => {
   return new Response("{}", { status: 404, headers: { "content-type": "application/json" } });
 };
 
-export async function baue(holen: typeof fetch = feedAttrappe) {
-  const db = oeffnen(":memory:");
+export async function baue(holen: typeof fetch = feedAttrappe, datei = ":memory:") {
+  const db = oeffnen(datei);
   await hauptadminSicherstellen(db, ADMIN.email, ADMIN.passwort);
   const { app, takt } = await baueApp({ db, holen, protokoll: false });
   return { app, db, takt };

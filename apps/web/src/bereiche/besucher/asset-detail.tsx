@@ -1,9 +1,10 @@
 import { useState, type ReactNode } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { api, assetPfad, bildUrl, fehlertext, mitSprache, type AssetDetail as Detail, type AssetListe, type Ereignis, type PcnEintrag } from "../../api.ts";
-import { Abschnitt, Augenbraue, Auswahl, cn, Knopf, Monowert, Zustand } from "../../bausteine/basis.tsx";
+import { Abschnitt, Augenbraue, Auswahl, cn, Fehlerhinweis, Knopf, Monowert, Schalter, Zustand } from "../../bausteine/basis.tsx";
 import { RohAnsicht, RohKnopf, Teilmodell, useRohdaten } from "../../bausteine/anzeige.tsx";
-import { Schaufenster } from "../../bausteine/dialog.tsx";
+import { Rueckfrage, Schaufenster } from "../../bausteine/dialog.tsx";
+import { useKonto } from "../../konto.tsx";
 import { Aenderungen, ArtMarkierung, ART_FARBE, AssetStatus, OrgLink, Produktbild } from "../../bausteine/fach.tsx";
 import type { Schluessel } from "../../i18n/de.ts";
 import { useT } from "../../i18n/sprache.tsx";
@@ -57,6 +58,7 @@ function Inhalt({ a, backoffice }: { a: Detail; backoffice?: Backoffice }) {
           <AssetStatus a={a} />
         </div>
       </header>
+      {backoffice && <AssetVerwalten a={a} bo={backoffice} />}
       {backoffice && <AssetAbrufen a={a} bo={backoffice} />}
 
       <Schaufenster offen={gross} aufOffen={setGross} titel={a.name ?? a.itemId} breit>
@@ -114,6 +116,83 @@ function Fakt({ titel, children }: { titel: string; children: ReactNode }) {
 
 function Kleintitel({ children }: { children: ReactNode }) {
   return <span className="text-[11px] font-semibold tracking-[0.08em] text-text-hinweis uppercase">{children}</span>;
+}
+
+// ---------- Sichtbarkeit und Loeschen (Backoffice) ----------
+
+/**
+ * Oeffentlich zeigen oder ausblenden duerfen alle Mitglieder; Loeschen nur Admins, der Knopf
+ * erscheint fuer andere gar nicht (der Server lehnt es ohnehin mit 404 ab).
+ */
+function AssetVerwalten({ a, bo }: { a: Detail; bo: Backoffice }) {
+  const u = useT();
+  const { t } = u;
+  const { nutzer } = useKonto();
+  const { auffrischen } = useStrom();
+  const navigate = useNavigate();
+  const [laeuft, setLaeuft] = useState(false);
+  const [fehler, setFehler] = useState<string | null>(null);
+  const [frage, setFrage] = useState(false);
+
+  async function ausfuehren(arbeit: () => Promise<unknown>): Promise<boolean> {
+    setLaeuft(true);
+    setFehler(null);
+    try {
+      await arbeit();
+      return true;
+    } catch (f) {
+      setFehler(fehlertext(f, u));
+      return false;
+    } finally {
+      setLaeuft(false);
+    }
+  }
+
+  const umschalten = (oeffentlich: boolean) =>
+    void ausfuehren(() => api(boPfad(bo, a), { methode: "PATCH", koerper: { oeffentlich } })).then((ok) => ok && auffrischen());
+
+  const loeschen = () =>
+    void ausfuehren(() => api(`/api/admin/assets/${a.endpunktId}/${encodeURIComponent(a.itemId)}`, { methode: "DELETE" })).then((ok) => {
+      if (!ok) return;
+      setFrage(false);
+      // Erst weg, dann neu laden: sonst fragt diese Seite das geloeschte Asset noch einmal ab (404).
+      navigate(`/backoffice/${bo.orgId}`);
+      auffrischen();
+    });
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+        <Schalter an={!a.verborgen} text={t("detail.oeffentlich")} disabled={laeuft} aufWechsel={umschalten} />
+        {a.verborgen && <span className="text-sm text-text-hinweis">{t("detail.ausgeblendetHinweis")}</span>}
+        {nutzer?.rolle === "admin" && (
+          <Knopf
+            art="still"
+            className="ml-auto h-9 px-4 text-sm hover:text-fehler"
+            onClick={() => {
+              setFehler(null);
+              setFrage(true);
+            }}
+          >
+            {t("detail.loeschen")}
+          </Knopf>
+        )}
+      </div>
+      {fehler && !frage && <Fehlerhinweis>{fehler}</Fehlerhinweis>}
+      <Rueckfrage
+        offen={frage}
+        aufOffen={setFrage}
+        titel={t("detail.loeschen")}
+        bestaetigenText={t("allg.loeschen")}
+        art="gefahr"
+        laeuft={laeuft}
+        fehler={frage ? fehler : null}
+        aufBestaetigen={loeschen}
+      >
+        <p>{t("detail.loeschenFrage", { name: a.name ?? a.itemId })}</p>
+      </Rueckfrage>
+    </div>
+  );
 }
 
 // ---------- Neu abrufen (Backoffice) ----------

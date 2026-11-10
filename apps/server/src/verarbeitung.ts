@@ -39,6 +39,15 @@ export function repoBasis(source: string): string {
   return source.replace(/\/+$/, "").replace(/\/(shells|submodels)$/, "");
 }
 
+/**
+ * Steht das Asset noch? Nach jedem `await` pruefen, bevor geschrieben wird: der Admin kann es
+ * waehrenddessen geloescht haben, und `submodelle`, `pcns` und `events` haengen nur am
+ * Endpunkt, nicht am Asset. Ohne diese Pruefung blieben verwaiste Zeilen zurueck.
+ */
+function assetDa(db: DB, eid: number, item: string): boolean {
+  return !!db.prepare("SELECT 1 FROM assets WHERE endpunkt_id=? AND item_id=?").get(eid, item);
+}
+
 function fehlertext(f: unknown): string {
   return f instanceof AbrufFehler || f instanceof Error ? f.message : String(f);
 }
@@ -122,6 +131,7 @@ async function submodelUebernehmen(
     | { inhalt: string | null }
     | undefined;
   const geladen = await submodelLaden(lauf, repo, smId);
+  if (!assetDa(db, eid, item)) return { aenderungen: null, fehler: null };
   const semId = semanticId ?? geladen.inhalt?.semanticId?.keys?.[0]?.value ?? null;
   const idShort = submodelNameVon(smId) ?? geladen.inhalt?.idShort ?? null;
 
@@ -360,6 +370,9 @@ export async function uebernehmen(db: DB, lauf: Lauf, eid: number, event: CloudE
     ).run(p.artikel, p.hersteller, p.bestellnummer, eid, item);
   }
 
+  // Waehrend des Abrufs geloescht: das Event nicht mehr schreiben, sonst stuende es verwaist im
+  // Protokoll. Ein spaeteres Event legt das Asset wieder an (Nutzerentscheidung 10.11.2026).
+  if (!assetDa(db, eid, item)) return null;
   db.prepare("UPDATE assets SET aktualisiert=? WHERE endpunkt_id=? AND item_id=?").run(event.time, eid, item);
 
   return db

@@ -11,7 +11,7 @@
 
 import { elementAnPfad, encodeIdentifier, submodelAnzeigename, zusammenfassen, type Element, type PcnRecord } from "@datenportal/core";
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { assetsLesen, eventsLesen, kennzahlen, organisationAnsicht, type OrganisationZeile } from "../ansicht.ts";
+import { assetsLesen, eventsLesen, kennzahlen, organisationAnsicht, SICHTBAR, type OrganisationZeile } from "../ansicht.ts";
 import { nutzerAusSitzung } from "../auth/sitzung.ts";
 import type { DB } from "../db.ts";
 import { anhang } from "../holen.ts";
@@ -39,19 +39,37 @@ type AssetFilter = {
   proSeite?: string;
 };
 
+/** Ist die Anfrage Mitglied dieser Organisation oder Admin? */
+function gehoertDazu(db: DB, req: FastifyRequest, orgId: number): boolean {
+  const ich = nutzerAusSitzung(db, req);
+  return ich?.rolle === "admin" || ich?.organisationId === orgId;
+}
+
 /** Darf die Anfrage die Organisation sehen? Oeffentlich, eigenes Mitglied oder Admin. */
 export function sichtbarFuer(db: DB, req: FastifyRequest): (org: { id: number; oeffentlich: boolean | number }) => boolean {
-  const ich = nutzerAusSitzung(db, req);
-  return (org) => org.oeffentlich === true || org.oeffentlich === 1 || ich?.rolle === "admin" || ich?.organisationId === org.id;
+  return (org) => org.oeffentlich === true || org.oeffentlich === 1 || gehoertDazu(db, req, org.id);
+}
+
+/**
+ * Ausgeblendete Assets (seit 10.11.2026) zeigt eine Liste nur mit `alle=1` und nur Mitgliedern
+ * und dem Admin, also im Backoffice. Ohne `alle=1` sieht auch ein angemeldetes Mitglied im
+ * oeffentlichen Portal nur Freigegebenes: ein angemeldeter Messerechner zeigt nichts Verborgenes.
+ */
+function mitVerborgenen(db: DB, req: FastifyRequest, orgId: number): boolean {
+  return (req.query as { alle?: string } | undefined)?.alle === "1" && gehoertDazu(db, req, orgId);
 }
 
 export function oeffentlicheRouten(app: FastifyInstance, k: Kontext) {
   const { db } = k;
 
-  /** Ein Asset, wenn die Anfrage es sehen darf; sonst null (die Route antwortet dann 404). */
+  /**
+   * Ein Asset, wenn die Anfrage es sehen darf; sonst null (die Route antwortet dann 404).
+   * Ein ausgeblendetes Asset sehen nur Mitglieder und der Admin, das Backoffice braucht es.
+   */
   function sichtbaresAsset(req: FastifyRequest, eid: number, item: string) {
     const [a] = assetsLesen(db, "WHERE a.endpunkt_id = ? AND a.item_id = ?", [eid, item]);
     if (!a) return null;
+    if (a.verborgen) return gehoertDazu(db, req, a.organisationId) ? a : null;
     return sichtbarFuer(db, req)({ id: a.organisationId, oeffentlich: a.organisationOeffentlich }) ? a : null;
   }
 
@@ -65,7 +83,7 @@ export function oeffentlicheRouten(app: FastifyInstance, k: Kontext) {
 
   app.get<{ Querystring: { limit?: string } }>("/api/assets/neu", async (req) => {
     const limit = Math.min(24, Math.max(1, Number(req.query.limit ?? 8) || 8));
-    return assetsLesen(db, "WHERE a.registriert IS NOT NULL AND o.oeffentlich = 1", [], `ORDER BY a.registriert DESC, a.item_id LIMIT ${limit}`);
+    return assetsLesen(db, `WHERE a.registriert IS NOT NULL AND o.oeffentlich = 1 AND ${SICHTBAR}`, [], `ORDER BY a.registriert DESC, a.item_id LIMIT ${limit}`);
   });
 
   app.get<{ Querystring: AssetFilter }>("/api/assets", async (req) => {
@@ -80,8 +98,9 @@ export function oeffentlicheRouten(app: FastifyInstance, k: Kontext) {
         | undefined;
       wo.push("o.id = ?");
       werte.push(o && sichtbarFuer(db, req)(o) ? o.id : -1);
+      if (!o || !mitVerborgenen(db, req, o.id)) wo.push(SICHTBAR);
     } else {
-      wo.push("o.oeffentlich = 1");
+      wo.push("o.oeffentlich = 1", SICHTBAR);
     }
 
     const q = (f.q ?? "").trim();
@@ -125,7 +144,7 @@ export function oeffentlicheRouten(app: FastifyInstance, k: Kontext) {
         .prepare(
           `SELECT o.id, o.name, COUNT(a.item_id) AS anzahl FROM organisationen o
            JOIN endpunkte ep ON ep.organisation_id = o.id JOIN assets a ON a.endpunkt_id = ep.id
-           WHERE o.oeffentlich = 1 GROUP BY o.id ORDER BY o.name COLLATE NOCASE`,
+           WHERE o.oeffentlich = 1 AND ${SICHTBAR} GROUP BY o.id ORDER BY o.name COLLATE NOCASE`,
         )
         .all(),
     };
@@ -232,7 +251,11 @@ export function oeffentlicheRouten(app: FastifyInstance, k: Kontext) {
   app.get<{ Params: { slug: string } }>("/api/organisationen/:slug", async (req, reply) => {
     const o = db.prepare("SELECT * FROM organisationen WHERE slug = ?").get(req.params.slug) as OrganisationZeile | undefined;
     if (!o || !sichtbarFuer(db, req)(o)) return reply.code(404).send({ fehler: "nicht-gefunden" });
-    return { ...organisationAnsicht(o, sprache(req)), hatLogo: logoVorhanden(o), kennzahlen: kennzahlen(db, o.id) };
+    return {
+      ...organisationAnsicht(o, sprache(req)),
+      hatLogo: logoVorhanden(o),
+      kennzahlen: kennzahlen(db, o.id, { mitVerborgenen: mitVerborgenen(db, req, o.id) }),
+    };
   });
 
   /**

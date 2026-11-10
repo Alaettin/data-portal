@@ -40,6 +40,7 @@ export function BoOrgSeite() {
     <OrgAnsicht
       slug={daten.organisation.slug}
       basisPfad={`/backoffice/${orgId}/assets`}
+      backoffice={{ orgId }}
       privatHinweis={
         <div role="status" className="flex flex-wrap items-center justify-between gap-3 border-l-4 border-art-pcn bg-flaeche px-5 py-4 shadow-flaeche">
           <span className="text-[15px]">{t("bo.privat")}</span>

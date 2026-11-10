@@ -58,9 +58,22 @@ export function Organisationsseite() {
  * oeffentlich und im Backoffice; dort fuehren die Asset-Links ins Backoffice und eine private
  * Organisation bekommt einen Hinweis.
  */
-export function OrgAnsicht({ slug, basisPfad, privatHinweis }: { slug: string; basisPfad?: string; privatHinweis?: ReactNode }) {
+export function OrgAnsicht({
+  slug,
+  basisPfad,
+  privatHinweis,
+  backoffice,
+}: {
+  slug: string;
+  basisPfad?: string;
+  privatHinweis?: ReactNode;
+  /** Im Backoffice: ausgeblendete Assets mitzaehlen und in der Liste mit Schalter zeigen. */
+  backoffice?: { orgId: number };
+}) {
   const { t, zahl } = useT();
-  const { daten: o, fehler, laedt } = useDaten<Organisation & { kennzahlen: Kennzahlen }>(`/api/organisationen/${encodeURIComponent(slug)}`);
+  const { daten: o, fehler, laedt } = useDaten<Organisation & { kennzahlen: Kennzahlen }>(
+    `/api/organisationen/${encodeURIComponent(slug)}${backoffice ? "?alle=1" : ""}`,
+  );
 
   return (
     <Zustand laedt={laedt && !o} fehler={fehler === "nicht-gefunden" ? null : fehler} leer={fehler === "nicht-gefunden"} leerText={t("org.nichtGefunden")}>
@@ -109,7 +122,7 @@ export function OrgAnsicht({ slug, basisPfad, privatHinweis }: { slug: string; b
               { zahl: zahl(o.kennzahlen.abkuendigungen), text: t("kz.abkuendigungen"), ton: "var(--color-art-abkuendigung)" },
             ]}
           />
-          <Assetliste organisationId={o.id} titel={t("org.assetsVon", { name: o.name })} basisPfad={basisPfad} />
+          <Assetliste organisationId={o.id} titel={t("org.assetsVon", { name: o.name })} basisPfad={basisPfad} backoffice={backoffice} />
         </OrgFarbe>
       )}
     </Zustand>

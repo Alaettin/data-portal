@@ -21,7 +21,12 @@ export type DB = Database.Database;
  * Fassung 4 (04.11.2026): `organisationen.oeffentlich`. Neue Organisationen sind privat,
  * vorhandene waren bis Fassung 3 immer sichtbar und bleiben es.
  */
-const FASSUNG = 4;
+/**
+ * Fassung 5 (10.11.2026): Tabelle `verborgen`, Assets, die eine Organisation aus der
+ * oeffentlichen Ansicht ausgeblendet hat. Eigene Tabelle statt Spalte an `assets`, damit
+ * "Neu einlesen" (loescht und baut `assets` neu auf) die Auswahl nicht verliert.
+ */
+const FASSUNG = 5;
 /** Fassungen darunter hingen an `lieferanten` und werden verworfen. Fest, nicht mitwachsend. */
 const VERWERFEN_UNTER = 2;
 
@@ -136,6 +141,12 @@ CREATE TABLE IF NOT EXISTS pcns (
   zeit         TEXT NOT NULL,
   UNIQUE (endpunkt_id, event_id)
 );
+
+CREATE TABLE IF NOT EXISTS verborgen (
+  endpunkt_id  INTEGER NOT NULL REFERENCES endpunkte(id) ON DELETE CASCADE,
+  item_id      TEXT NOT NULL,
+  PRIMARY KEY (endpunkt_id, item_id)
+);
 `;
 
 export function oeffnen(datei?: string): DB {
@@ -144,6 +155,9 @@ export function oeffnen(datei?: string): DB {
   const db = new Database(pfad);
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
+  // Geloeschte Inhalte (auch Bild-BLOBs) werden ueberschrieben, statt als freie Seiten in der
+  // Datei liegen zu bleiben. Wichtig fuer das Loeschen durch den Admin.
+  db.pragma("secure_delete = ON");
 
   const fassung = db.pragma("user_version", { simple: true }) as number;
   // Nur der Bestand der Fassung 1 (Lieferanten) wird verworfen. **Nie an FASSUNG koppeln**:

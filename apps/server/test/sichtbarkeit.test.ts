@@ -61,6 +61,67 @@ describe("Sichtbarkeit", () => {
   });
 });
 
+describe("Ausgeblendete Assets", () => {
+  it("zeigt Besuchern nur Freigegebenes, dem Backoffice mit alle=1 alles", async () => {
+    const a = await mitFeed(true);
+    const holen = (url: string, cookie?: string) => t.app.inject({ url, headers: cookie ? { cookie } : {} });
+    const liste = async (url: string, cookie?: string) => (await holen(url, cookie)).json() as Liste;
+    const vorher = await liste("/api/assets?proSeite=100");
+    const ziel = vorher.eintraege.find((e) => e.registriert)!;
+    const pfad = `/api/backoffice/${a.orgId}/assets/${ziel.endpunktId}/${encodeURIComponent(ziel.itemId)}`;
+    const detail = `/api/assets/${ziel.endpunktId}/${encodeURIComponent(ziel.itemId)}`;
+    const umschalten = (oeffentlich: unknown, cookie = a.cookie) =>
+      t.app.inject({ method: "PATCH", url: pfad, headers: { cookie }, payload: { oeffentlich } });
+    const facette = (l: Liste & { facetten?: { organisationen: { anzahl: number }[] } }) => l.facetten?.organisationen[0]?.anzahl ?? 0;
+    const zaehler = async () => ({
+      uebersicht: ((await holen("/api/uebersicht")).json() as { assets: number }).assets,
+      organisationen: ((await holen("/api/organisationen")).json() as { assets: number }[])[0]!.assets,
+      orgSeite: ((await holen("/api/organisationen/alpha")).json() as { kennzahlen: { assets: number } }).kennzahlen.assets,
+      facette: facette(await liste("/api/assets")),
+    });
+    const start = await zaehler();
+    expect(start.uebersicht).toBe(vorher.gesamt);
+
+    expect((await umschalten(false)).statusCode).toBe(200);
+    const enthalten = (l: Liste) => l.eintraege.some((e) => e.itemId === ziel.itemId);
+
+    // Besucher: fehlt in allen Sammelansichten und Zaehlern, Detail und Bild sind 404.
+    expect(enthalten(await liste("/api/assets?proSeite=100"))).toBe(false);
+    expect(enthalten(await liste(`/api/assets?organisation=${a.orgId}&proSeite=100`))).toBe(false);
+    expect(enthalten(await liste(`/api/assets?organisation=${a.orgId}&proSeite=100&alle=1`))).toBe(false);
+    expect(((await holen("/api/assets/neu?limit=24")).json() as { itemId: string }[]).some((e) => e.itemId === ziel.itemId)).toBe(false);
+    expect(await zaehler()).toEqual({ uebersicht: start.uebersicht - 1, organisationen: start.organisationen - 1, orgSeite: start.orgSeite - 1, facette: start.facette - 1 });
+    expect((await holen(detail)).statusCode).toBe(404);
+    expect((await holen(`${detail}/bild`)).statusCode).toBe(404);
+
+    // Mitglied: im oeffentlichen Portal ohne alle=1 ebenfalls nicht, im Backoffice mit alle=1 schon.
+    expect(enthalten(await liste(`/api/assets?organisation=${a.orgId}&proSeite=100`, a.cookie))).toBe(false);
+    const bo = await liste(`/api/assets?organisation=${a.orgId}&proSeite=100&alle=1`, a.cookie);
+    expect(bo.eintraege.find((e) => e.itemId === ziel.itemId)).toMatchObject({ verborgen: true });
+    expect(((await holen("/api/organisationen/alpha?alle=1", a.cookie)).json() as { kennzahlen: { assets: number } }).kennzahlen.assets).toBe(start.orgSeite);
+    expect((await holen(detail, a.cookie)).statusCode).toBe(200);
+    expect((await holen(detail, a.admin)).statusCode).toBe(200);
+
+    // Fremdes Mitglied: darf nicht umschalten und sieht es nicht.
+    const b = await organisationMitNutzer(t.app, a.admin, "Beta", "b@example.invalid");
+    expect((await umschalten(true, b.cookie)).statusCode).toBe(404);
+    expect((await holen(detail, b.cookie)).statusCode).toBe(404);
+    expect((await umschalten("ja")).statusCode).toBe(400);
+
+    // Neu einlesen behaelt die Auswahl.
+    await t.app.inject({ method: "POST", url: `/api/backoffice/${a.orgId}/endpunkte/${a.eid}/neu-einlesen`, headers: { cookie: a.cookie } });
+    await t.app.inject({ method: "POST", url: `/api/backoffice/${a.orgId}/endpunkte/${a.eid}/lesen`, headers: { cookie: a.cookie } });
+    expect(enthalten(await liste("/api/assets?proSeite=100"))).toBe(false);
+    expect((await holen(detail, a.cookie)).statusCode).toBe(200);
+
+    // Wieder einschalten macht es sichtbar.
+    expect((await umschalten(true)).statusCode).toBe(200);
+    expect(enthalten(await liste("/api/assets?proSeite=100"))).toBe(true);
+    expect((await holen(detail)).statusCode).toBe(200);
+    expect(await zaehler()).toEqual(start);
+  });
+});
+
 describe("Abfragetakt", () => {
   it("nimmt jeden Wert zwischen 30 s und 24 h", async () => {
     const admin = await anmelden(t.app, ADMIN.email, ADMIN.passwort);

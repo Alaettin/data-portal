@@ -93,12 +93,20 @@ export function eventsLesen(db: DB, wo: string, werte: unknown[], sprache: Sprac
   return (db.prepare(`${EVENT_SQL} ${wo} ${nachher}`).all(...werte) as EventMitKontext[]).map((z) => eventAnsicht(z, sprache));
 }
 
+/**
+ * Bedingung "nicht ausgeblendet" fuer ein Asset mit dem Kuerzel `a` (oder einer Zeile mit
+ * `endpunkt_id`/`item_id` unter anderem Kuerzel). Oeffentliche Ansichten haengen sie an.
+ */
+export const sichtbar = (k = "a") =>
+  `NOT EXISTS (SELECT 1 FROM verborgen v WHERE v.endpunkt_id = ${k}.endpunkt_id AND v.item_id = ${k}.item_id)`;
+export const SICHTBAR = sichtbar();
+
 /** Kurzform eines Assets fuer Listen, mit Organisation. `a`, `ep`, `o` als Tabellenkuerzel. */
 export const ASSET_SQL = `
   SELECT a.endpunkt_id AS endpunktId, a.item_id AS itemId, a.name, a.hersteller, a.bestellnummer,
          a.bild IS NOT NULL AS hatBild, a.logo IS NOT NULL AS hatLogo, a.registriert, a.aktualisiert, a.gespeichert,
          o.id AS organisationId, o.name AS organisation, o.slug AS organisationSlug, o.farbe AS organisationFarbe,
-         o.oeffentlich AS organisationOeffentlich,
+         o.oeffentlich AS organisationOeffentlich, NOT ${SICHTBAR} AS verborgen,
          (SELECT COUNT(*) FROM events e WHERE e.endpunkt_id = a.endpunkt_id AND e.item_id = a.item_id AND e.art = 'submodel-geaendert') AS anzahlUpdates,
          (SELECT COUNT(*) FROM pcns p WHERE p.endpunkt_id = a.endpunkt_id AND p.item_id = a.item_id) AS anzahlPcns,
          EXISTS (SELECT 1 FROM pcns p WHERE p.endpunkt_id = a.endpunkt_id AND p.item_id = a.item_id AND p.abkuendigung = 1) AS abgekuendigt
@@ -122,6 +130,7 @@ type AssetRoh = {
   organisationSlug: string;
   organisationFarbe: string;
   organisationOeffentlich: number;
+  verborgen: number;
   anzahlUpdates: number;
   anzahlPcns: number;
   abgekuendigt: number;
@@ -134,6 +143,7 @@ export function assetAnsicht(a: AssetRoh) {
     hatLogo: a.hatLogo === 1,
     abgekuendigt: a.abgekuendigt === 1,
     organisationOeffentlich: a.organisationOeffentlich === 1,
+    verborgen: a.verborgen === 1,
   };
 }
 
@@ -179,21 +189,26 @@ export function organisationAnsicht(o: OrganisationZeile, sprache: Sprache, beid
   };
 }
 
-/** Kennzahlen einer Organisation oder (ohne id) aller oeffentlichen Organisationen. */
-export function kennzahlen(db: DB, organisationId: number | null) {
+/**
+ * Kennzahlen einer Organisation oder (ohne id) aller oeffentlichen Organisationen.
+ * Ausgeblendete Assets und alles, was an ihnen haengt, zaehlen nur mit `mitVerborgenen`
+ * (Backoffice und Verwaltung), nie in oeffentlichen Ansichten.
+ */
+export function kennzahlen(db: DB, organisationId: number | null, { mitVerborgenen = false } = {}) {
   const filter =
     organisationId === null
       ? "AND ep.organisation_id IN (SELECT id FROM organisationen WHERE oeffentlich = 1)"
       : "AND ep.organisation_id = ?";
   const werte = organisationId === null ? [] : [organisationId];
+  const nur = (k: string) => (mitVerborgenen ? "" : `AND ${sichtbar(k)}`);
   const zahl = (sql: string, ...mehr: unknown[]) => (db.prepare(sql).get(...werte, ...mehr) as { n: number }).n;
   const heute = new Date().toISOString().slice(0, 10);
   return {
-    assets: zahl(`SELECT COUNT(*) AS n FROM assets a JOIN endpunkte ep ON ep.id = a.endpunkt_id WHERE 1 ${filter}`),
-    neuHeute: zahl(`SELECT COUNT(*) AS n FROM assets a JOIN endpunkte ep ON ep.id = a.endpunkt_id WHERE 1 ${filter} AND a.registriert >= ?`, heute),
-    updates: zahl(`SELECT COUNT(*) AS n FROM events e JOIN endpunkte ep ON ep.id = e.endpunkt_id WHERE 1 ${filter} AND e.art LIKE 'submodel-%'`),
-    pcns: zahl(`SELECT COUNT(*) AS n FROM pcns p JOIN endpunkte ep ON ep.id = p.endpunkt_id WHERE 1 ${filter}`),
-    abkuendigungen: zahl(`SELECT COUNT(*) AS n FROM pcns p JOIN endpunkte ep ON ep.id = p.endpunkt_id WHERE 1 ${filter} AND p.abkuendigung = 1`),
-    events: zahl(`SELECT COUNT(*) AS n FROM events e JOIN endpunkte ep ON ep.id = e.endpunkt_id WHERE 1 ${filter}`),
+    assets: zahl(`SELECT COUNT(*) AS n FROM assets a JOIN endpunkte ep ON ep.id = a.endpunkt_id WHERE 1 ${filter} ${nur("a")}`),
+    neuHeute: zahl(`SELECT COUNT(*) AS n FROM assets a JOIN endpunkte ep ON ep.id = a.endpunkt_id WHERE 1 ${filter} ${nur("a")} AND a.registriert >= ?`, heute),
+    updates: zahl(`SELECT COUNT(*) AS n FROM events e JOIN endpunkte ep ON ep.id = e.endpunkt_id WHERE 1 ${filter} ${nur("e")} AND e.art LIKE 'submodel-%'`),
+    pcns: zahl(`SELECT COUNT(*) AS n FROM pcns p JOIN endpunkte ep ON ep.id = p.endpunkt_id WHERE 1 ${filter} ${nur("p")}`),
+    abkuendigungen: zahl(`SELECT COUNT(*) AS n FROM pcns p JOIN endpunkte ep ON ep.id = p.endpunkt_id WHERE 1 ${filter} ${nur("p")} AND p.abkuendigung = 1`),
+    events: zahl(`SELECT COUNT(*) AS n FROM events e JOIN endpunkte ep ON ep.id = e.endpunkt_id WHERE 1 ${filter} ${nur("e")}`),
   };
 }

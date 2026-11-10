@@ -60,7 +60,7 @@ export function backofficeRouten(app: FastifyInstance, k: Kontext) {
       const o = db.prepare("SELECT * FROM organisationen WHERE id = ?").get(orgId) as OrganisationZeile;
       return {
         organisation: organisationAnsicht(o, sprache(req), true),
-        kennzahlen: kennzahlen(db, orgId),
+        kennzahlen: kennzahlen(db, orgId, { mitVerborgenen: true }),
         endpunkte: endpunkteVon(orgId),
       };
     });
@@ -170,12 +170,15 @@ export function backofficeRouten(app: FastifyInstance, k: Kontext) {
       return { neu: await k.takt.lesen(e.id) };
     });
 
-    /** Bestand dieses Endpunkts verwerfen und den Feed von vorn lesen. */
+    /**
+     * Bestand dieses Endpunkts verwerfen und den Feed von vorn lesen. Die ausgeblendeten Assets
+     * (`verborgen`) bleiben stehen: nach dem Einlesen sind sie wieder ausgeblendet.
+     */
     bereich.post<{ Params: { id: string } }>("/api/backoffice/:orgId/endpunkte/:id/neu-einlesen", async (req, reply) => {
       const e = endpunkt(organisationVon(req), Number(req.params.id));
       if (!e) return reply.code(404).send({ fehler: "nicht-gefunden" });
       db.transaction(() => {
-        for (const t of ["events", "assets", "submodelle", "pcns"]) db.prepare(`DELETE FROM ${t} WHERE endpunkt_id=?`).run(e.id);
+        for (const t of ["events", "pcns", "submodelle", "assets"]) db.prepare(`DELETE FROM ${t} WHERE endpunkt_id=?`).run(e.id);
         db.prepare("UPDATE endpunkte SET letzte_event_id=NULL, letzter_fehler=NULL WHERE id=?").run(e.id);
       })();
       k.strom.senden({ typ: "bestand" });
@@ -232,16 +235,25 @@ export function backofficeRouten(app: FastifyInstance, k: Kontext) {
       },
     );
 
-    bereich.delete<{ Params: { eid: string; item: string } }>("/api/backoffice/:orgId/assets/:eid/:item", async (req, reply) => {
-      const e = endpunkt(organisationVon(req), Number(req.params.eid));
-      if (!e) return reply.code(404).send({ fehler: "nicht-gefunden" });
-      db.transaction(() => {
-        for (const t of ["events", "assets", "submodelle", "pcns"]) {
-          db.prepare(`DELETE FROM ${t} WHERE endpunkt_id=? AND item_id=?`).run(e.id, req.params.item);
+    /**
+     * Ein Asset oeffentlich zeigen oder ausblenden. Duerfen alle Mitglieder und der Admin;
+     * Loeschen dagegen nur der Admin (`/api/admin/assets/...`).
+     */
+    bereich.patch<{ Params: { eid: string; item: string }; Body: { oeffentlich?: boolean } }>(
+      "/api/backoffice/:orgId/assets/:eid/:item",
+      async (req, reply) => {
+        const e = endpunkt(organisationVon(req), Number(req.params.eid));
+        const item = req.params.item;
+        if (!e || !db.prepare("SELECT 1 FROM assets WHERE endpunkt_id=? AND item_id=?").get(e.id, item)) {
+          return reply.code(404).send({ fehler: "nicht-gefunden" });
         }
-      })();
-      k.strom.senden({ typ: "bestand" });
-      return { ok: true };
-    });
+        const oeffentlich = req.body?.oeffentlich;
+        if (typeof oeffentlich !== "boolean") throw new Eingabefehler("oeffentlich-fehlt");
+        if (oeffentlich) db.prepare("DELETE FROM verborgen WHERE endpunkt_id=? AND item_id=?").run(e.id, item);
+        else db.prepare("INSERT OR IGNORE INTO verborgen (endpunkt_id, item_id) VALUES (?, ?)").run(e.id, item);
+        k.strom.senden({ typ: "bestand" });
+        return { oeffentlich };
+      },
+    );
   });
 }
